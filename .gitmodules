@@ -1,0 +1,3 @@
+[submodule "src/main/asciidoc/codes"]
+	path = src/main/asciidoc/codes
+	url = git@github.com:jinahya/verbose-java.git

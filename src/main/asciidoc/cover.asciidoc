@@ -1,0 +1,3 @@
+= Verbose Java
+Jin Kwon
+:revnumber: {revnumber}
