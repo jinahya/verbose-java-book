@@ -34,8 +34,8 @@ public class CharsetTest {
     @Test
     public void name() throws CharacterCodingException {
         final String decodedName = "길동";
-        System.out.printf("%-20s %-20s\n", "canonical", "encoded");
-        System.out.printf("%1$20s %1$20s\n", "--------------------");
+        System.out.printf("%-20s %-20s%n", "canonical", "encoded");
+        System.out.printf("%1$20s %1$20s%n", "--------------------");
         for (Entry<String, Charset> entry : availableCharsets().entrySet()) {
             final String canonical = entry.getKey();
             final Charset charset = entry.getValue();
@@ -60,7 +60,7 @@ public class CharsetTest {
             final int length = encodedBuffer.remaining();
             final String encodedName
                     = new String(bytes, offset, length, US_ASCII);
-            System.out.printf("%-20s %-20s\n", canonical, encodedName);
+            System.out.printf("%-20s %-20s%n", canonical, encodedName);
         }
     }
 }
