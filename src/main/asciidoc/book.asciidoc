@@ -27,6 +27,8 @@ include::foreword.asciidoc[]
 
 include::introduction.asciidoc[]
 
-include::chapter01.asciidoc[]
+include::chapter03.asciidoc[]
 
-include::chapter02.asciidoc[]
+include::chapter04.asciidoc[]
+
+include::chapter05.asciidoc[]
