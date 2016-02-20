@@ -159,3 +159,59 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/secur
 ----
 include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/security/MdUtils2.java[lines=53..58]
 ----
+
+=== Implementing an interface without implementing the interface
+
+이번주부터 당신은 고객사의 건물에 내부의 온도 센서를 전부 교체하는 프로젝트에 투입되었다. 당신에게 맞겨진 작업은 온도 센서를 설치하는 업체에서 제공한 API 를 기존 시스템에 맞게 적용하는 작업이다.
+
+다음은 전달된 온도계의 값을 저장하는 서비스 클래스이다.
+
+[source,java]
+----
+include::../../../src/main/java/com/github/jinahya/verbose/reflect/TemperatureService.java[lines=20..25]
+----
+
+`FahrenheitThermometer` 인터페이스는 다음과 같다.
+
+[source,java]
+----
+include::../../../src/main/java/com/github/jinahya/verbose/reflect/FahrenheitThermometer.java[lines=18..22]
+----
+
+하지만 새로운 온도 센서를 담당하는 업체에서 제공한 API는 화씨(&#8457;) 대신 섭씨(&#8451;)를 사용한다.
+
+[source,java]
+----
+include::../../../src/main/java/com/github/jinahya/verbose/reflect/CelsiusThermometer.java[lines=18..22]
+----
+
+비용 등의 이유로 인해 `CelsiusThermometer` 인터페이스를 사용하는 새로운 비지니스 로직을 추가할 수 없을 때 어떻게 해야 할까?
+
+가장 접근하기 쉬운 방법은 `CelsiusThermometer` 를 `FahrenheitThermometer` 로 바꿔주는 어뎁터 클래스를 작성하는 것이다.
+
+[source,java]
+----
+include::../../../src/main/java/com/github/jinahya/verbose/reflect/FahrenheitThermometerAdapter.java[lines=18..31]
+----
+
+또 다른 방법은 {apidocs-javase}/java/lang/reflect/InvocationHandler.html[`java.lang.reflect.InvocationHandler`] 인터페이스와 {apidocs-javase}/java/lang/reflect/Proxy.html[`java.lang.reflect.Proxy`] 클래스를 이용하여 생성할 수 있는 프록시 객체를 사용하는 방법이다.
+
+우선 다음과 같이 {apidocs-javase}/java/lang/reflect/InvocationHandler.html[`java.lang.reflect.InvocationHandler`] 인터페이스를 구현하여 `FahrenheitThermoter#getTemperatureInFahrenheit()` 메서드 호출을 가로챈 후 `CelsiusThermometer` 객체를 이용하여 값을 반환도록 하자.
+
+[source,java]
+----
+include::../../../src/main/java/com/github/jinahya/verbose/reflect/FahrenheitThermometerHandler.java[lines=21..53]
+----
+<1> 호출을 가로챌 메서드(`FahrenheitThermoter#getTemperatureInFahrenheit()`)를 정의한다.
+<2> `proxy` 객체에 호출된 메서드가 해당 메서드이면 `celsius` 객체를 사용하여 섭씨에서 화씨로 변한한 값을 반환한다.
+<3> 다른 메서드들(e.g. `toString()`)은 `celsius` 객체에 직접 호출하고 그 결과를 반환한다.
+
+이제 {apidocs-javase}/java/lang/reflect/Proxy.html#newProxyInstance-java.lang.ClassLoader-java.lang.Class:A-java.lang.reflect.InvocationHandler-[`Proxy#newProxyInstance(ClassLoader, Class<?>[\], InvocationHandler)`] 메서드를 이용하여 프록시 객체를 생성한다.
+
+[source,java]
+----
+include::../../../src/main/java/com/github/jinahya/verbose/reflect/TemperatureSchedules.java[lines=29..37]
+----
+
+==== Mimicking Non-Blocking Channels
+
