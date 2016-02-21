@@ -162,7 +162,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/secur
 
 === Implementing an interface without implementing the interface
 
-이번주부터 당신은 고객사의 건물에 내부의 온도 센서를 전부 교체하는 프로젝트에 투입되었다. 당신에게 맞겨진 작업은 온도 센서를 설치하는 업체에서 제공한 API 를 기존 시스템에 맞게 적용하는 작업이다.
+이번주부터 당신은 고객사의 건물에 내부의 온도 센서를 전부 교체하는 프로젝트에 투입되었다. 당신에게 맞겨진 작업은 온도 센서를 설치하는 업체에서 제공한 API 를 기존 시스템에 적용하는 작업이다.
 
 다음은 전달된 온도계의 값을 저장하는 서비스 클래스이다.
 
@@ -194,6 +194,17 @@ include::../../../src/main/java/com/github/jinahya/verbose/reflect/CelsiusThermo
 include::../../../src/main/java/com/github/jinahya/verbose/reflect/FahrenheitThermometerAdapter.java[lines=18..31]
 ----
 
+[NOTE]
+====
+`FahrenheitThermometer` 인터페이스에 구현해야 할 메서드가 하나밖에 없으므로 다음과 같이 lambda 표현식을 사용하는 것도 가능하다.
+[source,java]
+----
+getTemperatureService().persistTemperature(
+        () -> getCelsiusThermometer().getTemeratureInCelsius()
+              * 1.8f + 32);
+----
+====
+
 또 다른 방법은 {apidocs-javase}/java/lang/reflect/InvocationHandler.html[`java.lang.reflect.InvocationHandler`] 인터페이스와 {apidocs-javase}/java/lang/reflect/Proxy.html[`java.lang.reflect.Proxy`] 클래스를 이용하여 생성할 수 있는 프록시 객체를 사용하는 방법이다.
 
 우선 다음과 같이 {apidocs-javase}/java/lang/reflect/InvocationHandler.html[`java.lang.reflect.InvocationHandler`] 인터페이스를 구현하여 `FahrenheitThermoter#getTemperatureInFahrenheit()` 메서드 호출을 가로챈 후 `CelsiusThermometer` 객체를 이용하여 값을 반환도록 하자.
@@ -210,8 +221,56 @@ include::../../../src/main/java/com/github/jinahya/verbose/reflect/FahrenheitThe
 
 [source,java]
 ----
-include::../../../src/main/java/com/github/jinahya/verbose/reflect/TemperatureSchedules.java[lines=29..37]
+include::../../../src/main/java/com/github/jinahya/verbose/reflect/TemperatureSchedules.java[lines=42..50]
 ----
 
 ==== Mimicking Non-Blocking Channels
+
+앞서 설명된 코드들 중 {apidocs-javase}/java/nio/channels/WritableByteChannel.html#write-java.nio.ByteBuffer-[`WritableByteChannel#write(ByteBuffer)`] 혹은 {apidocs-javase}/java/nio/channels/ReadableByteChannel.html#read-java.nio.ByteBuffer-[`ReadableByteChannel#read(ByteBuffer)`] 등의 메서드들은 해당 채널이 non-blocking 채널일 경우 버퍼의 가용한(`remaining`) 만큼의 모든 데이터를 모두 처리하지 않는다. 때문에 non-blocking 채널이라 가정하고 작성된 코드들이 예상대로 동작하는지 단위 테스트에서 확인할 수 없다.
+
+위에서 설명된 프록시를 이용하여 특정 채널 객체를 non-blocking 채널처럼 동작하게 만들 수 있다. 방법은 간단하다. `write(ByteBuffer)` 메서드 혹은 `read(ByteBuffer)` 메서드의 호출을 가로챈 후 `limit` 값을 임의로 줄이면 된다.
+
+[source,java]
+.BcUtils.java#nonBlockingWritable(Class<T>, T)
+----
+public static <T extends WritableByteChannel> T nonBlocking(
+        final Class<T> type, final T channel) {
+    //@todo: implement
+    return null;
+}
+----
+
+우선 http://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html#write-java.nio.ByteBuffer-[`WritableByteChannel#write(ByteBuffer)`] 메서드를 선언한다.
+
+[source,java]
+.BcUtils.java#nonBlockingWritable(Class<T>, T)
+----
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/nio/channels/BcUtils.java[lines=46..52]
+----
+<1> 호출을 가로챌 메서드를 찾아서 선언한다.
+
+그 다음 `InvocationHandler` 객체를 하나 구현한다.
+
+[source,java]
+.BcUtils.java#nonBlockingWritable(Class<T>, T)
+----
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/nio/channels/BcUtils.java[lines=53..66]
+----
+<1> 호출된 메서드(`m`)가 미리 정의해 놓은 메서드(`method`, `WritableByteChannel#write(ByteBuffer)`)와 같으면
+<2> 메서드에 전달된 첫 번째 인자(`a[0]`)인 버퍼를 찾아서
+<3> `limit` 값을 저장해 놓은 후
+<4> 버퍼의 가용한 값(`remaining`) 값을 임의로 줄여서 (마치 non-blocking 채널에 호출한 것과 같은 결과를 내도록 설정한 후)
+<5> 채널에 직접 호출한 값을 반환한다.
+<6> 반환하기 전에 limit 값을 복원한다.
+<7> 다른 메서드들은 그대로 호출한다.
+
+마지막으로 `Proxy#newProxyInstance` 메서드를 이용하여 프록시 객체를 생성한다.
+
+[source,java]
+.BcUtils.java#nonBlockingWritable(Class<T>, T)
+----
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/nio/channels/BcUtils.java[lines=67..69]
+----
+<1> 프록시 객체를 생성한다.
+<2> 해당 형으로 변환하여 반환한다.
 

@@ -15,6 +15,7 @@
  */
 package com.github.jinahya.verbose.reflect;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
@@ -25,6 +26,18 @@ import javax.inject.Inject;
 @RequestScoped
 @Stateless
 public class TemperatureSchedules {
+
+    private static Method GET_TEMPERATURE_IN_FAHRENHEIT;
+
+    static {
+        try {
+            GET_TEMPERATURE_IN_FAHRENHEIT
+                    = FahrenheitThermometer.class.getMethod(
+                            "getTemperatureInFahrenheit");
+        } catch (final NoSuchMethodException nsme) {
+            throw new InstantiationError(nsme.getMessage());
+        }
+    }
 
     public static FahrenheitThermometer newFahrenheitProxyInstance(
             final CelsiusThermometer celsius) {
@@ -48,7 +61,28 @@ public class TemperatureSchedules {
 
     @Schedule
     public void schedule3() {
+        service.persistTemperature(
+                () -> celsius.getTemperatureInCelsius() * 1.8f + 32);
+    }
+
+    @Schedule
+    public void schedule4() {
         service.persistTemperature(newFahrenheitProxyInstance(celsius));
+    }
+
+    @Schedule
+    public void schedule5() {
+        service.persistTemperature(
+                (FahrenheitThermometer) Proxy.newProxyInstance(
+                        FahrenheitThermometer.class.getClassLoader(),
+                        new Class<?>[]{FahrenheitThermometer.class},
+                        (p, m, a) -> {
+                            if (m.equals(GET_TEMPERATURE_IN_FAHRENHEIT)) {
+                                return celsius.getTemperatureInCelsius()
+                                       * 1.8f + 32;
+                            }
+                            return m.invoke(celsius, a);
+                        }));
     }
 
     @Inject
