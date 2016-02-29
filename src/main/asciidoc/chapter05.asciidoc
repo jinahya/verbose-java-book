@@ -110,7 +110,7 @@ upper  H H H H
 lower          L L L L
 ----
 
-그리고 (네 개의 비트로 표현되는) 각 그룹의 값(`0` ~ `15`)을 아래 표에 정의된 열 여섯개의 문자로 변경한다.
+그리고 (네 개의 비트로 표현되는) 각 그룹의 값(`0` ~ `15`)을 아래 표에 정의된 열 여섯개의 문자들 중 하나로 변환한다. (한 개의 바이트가 두개의 문자로 변환된다.)
 
 [cols=">, >, >, >", options="header"]
 .hexadecimal encoding/decoding
@@ -181,7 +181,7 @@ hex-codec-api 모듈에는 `Base 16 Encoding` 을 위한 두 개의 인터페이
 public interface HexEncoder {
 
     // 주어진 숫자(decoded)를 두개의 hex 문자로 변환하여 버퍼(encoded)에 담는다.
-    // 버퍼(encoded)의 remaining 값이 2 보다 작으면 BufferOverflowException 을 던진다.
+    // 버퍼(encoded)에 담을 수 있는 공간(remaining)이 2 보다 작으면 BufferOverflowException 을 던진다.
     void encodeOctet(int decoded, ByteBuffer encoded);
 }
 ----
@@ -195,8 +195,8 @@ public interface HexEncoder {
 [source,java]
 .HexEncoder.java#encode(ByteBuffer, ByteBuffer)
 ----
-    // decoded 버퍼의 바이트들을 인코딩하고 그 결과를 encoded 버퍼에 담는다.
-    // decoded 버퍼에서 소비된 바이트의 개수를 반환한다.
+    // decoded 버퍼에 남아있는(remaining) 각각의 바이트들을 변환하고 그 결과를 encoded 버퍼에 담는다.
+    // decoded 버퍼에서 소비된(인코드 된) 바이트의 개수를 반환한다.
 include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexEncoder.java[lines=42..48]
 ----
 <1> `decoded` 버퍼의 현재 위치(`position`) 값을 기록해 둔다.
@@ -258,6 +258,7 @@ public interface HexDecoder {
 .HexDecoder.java#decode(ByteBuffer, ByteBuffer)
 ----
     // 입력 버퍼(encoded)에서 문자들을 변한하여 출력 버퍼(decoded)에 담는다.
+    // 출력 버퍼에 추가된 바이트의 개수를 반환한다.
 include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexDecoder.java[lines=42..48]
 ----
 <1> `encoded` 버퍼에 읽을 바이트의 개수가 2개 이상 있고 `decoded` 버퍼에 쓸 수 있는 공간이 남아 있는 동안
@@ -268,17 +269,20 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexDec
 [source,java]
 .HexDecoder.java#decode(ByteBuffer)
 ----
+    // 주어진 버퍼(encoded)에 남아있는(remaining) 문자들을 디코드한 후 그 결과를 새 버퍼에 담아 반환한다.
 include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexDecoder.java[lines=57..61]
 ----
 <1> `encoded` 버퍼에서 읽을 수 있는 바이트 개수의 절반 만큼의 버퍼를 생성하고
 <2> `encode(ByteBuffer, ByteBuffer)` 메서드에 전달해서 디코드한다.
-<3> 반환할 버퍼를 뒤집어(flip) 읽을 수 있는 상태로 만든다.
+<3> 반환할 버퍼를 뒤집어(`flip()`) 읽을 수 있는 상태로 만든다.
 
 ===== decode(String, Charset)
 
 [source,java]
 .HexDecoder.java#decode(String, Charset)
 ----
+    // 주어진 문자열(encoded)를 디코드하고 그 결과를 새로운 문자열로 반환한다.
+    // 디코드된 바이트들과 명시된 문자셋(charset)을 이용하여 문자열을 생성한다.
 include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexDecoder.java[lines=71..76]
 ----
 <1> 문자열로부터 입력 배열을 생성한다.
@@ -328,43 +332,33 @@ final OutputStream hos = new HexOutputStream(null, null) {
 
 ===== OutputStream#close()
 
-스트림을 닫고 사용되고 있는 자원들(any system resources)을 해제한다.
+스트림을 닫고 사용되고 있는 자원들을 해제한다.
 
-{apidocs-javase}/java/io/FilterOutputStream.html#close--[`FilterOutputStream#close()`] 메서드는 `flush()` 메서드를 호출하고 `out` 객체의 `close()` 메서드를 호출한다.
-
-`HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
+{apidocs-javase}/java/io/FilterOutputStream.html#close--[`FilterOutputStream#close()`] 메서드는 `flush()` 메서드를 호출하고 `out` 객체의 `close()` 메서드를 호출한다. `HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
 
 ===== OutputStream#flush()
 
 데이터가 중간에 쌓여(buffered)있다면 실제 목적지로 밀어낸다.
 
-{apidocs-javase}/java/io/FilterOutputStream.html#flush--[`FilterOutputStream#flush()`] 메서드는 `out` 객체의 `flush()` 메서드를 호출한다.
-
-`HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
+{apidocs-javase}/java/io/FilterOutputStream.html#flush--[`FilterOutputStream#flush()`] 메서드는 `out` 객체의 `flush()` 메서드를 호출한다. `HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
 
 ===== OutputStream#write(byte[] b)
 
 주어진 배열의 (모든) 값을 기록한다. `write(b, 0, b.length)` 를 호출한 것과 동일한 효과를 가져야 한다.
 
-{apidocs-javase}/java/io/FilterOutputStream.html#write-byte:A-[`FilterOutputStream#write(byte[\])`] 메서드는 `write(b,0,b.length)` 를 호출한다.
-
-`HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
+{apidocs-javase}/java/io/FilterOutputStream.html#write-byte:A-[`FilterOutputStream#write(byte[\])`] 메서드는 `write(b,0,b.length)` 를 호출한다. `HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
 
 ===== OutputStream#write(byte[] b, int off, int len)
 
 주어진 배열의 `off` 위치부터 `len` 만큼의 바이트들을 기록한다.
 
-{apidocs-javase}/java/io/FilterOutputStream.html#write-byte:A-int-int-[`FilterOutputStream#write(byte[\],int,int)`] 메서드는 각 바이트를 `write(int)` 메서드에 하나씩 전달한다.
-
-`HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
+{apidocs-javase}/java/io/FilterOutputStream.html#write-byte:A-int-int-[`FilterOutputStream#write(byte[\],int,int)`] 메서드는 각 바이트를 `write(int)` 메서드에 하나씩 전달한다. `HexOutputStream` 클래스에서는 별도로 재정의하지 않았다.
 
 ===== OutputStream#write(int b)
 
 주어진 바이트를 기록한다. 하위 8 개의 비트들만 사용되고 상위 24 개의 비트들은 무시된다.
 
-{apidocs-javase}/java/io/FilterOutputStream.html#write-int-[`FilterOutputStream#write(int)`] 메서드는 `out` 객체의 `write(int)` 메서드에 주어진 값을 전달한다.
-
-`HexOutputStream` 클래스에서는 다음과 같이 재정의되었다.
+{apidocs-javase}/java/io/FilterOutputStream.html#write-int-[`FilterOutputStream#write(int)`] 메서드는 `out` 객체의 `write(int)` 메서드에 주어진 값을 전달한다. `HexOutputStream` 클래스에서는 다음과 같이 재정의되었다.
 
 [source,java]
 .HexOutputStream.java#write(int)
@@ -373,7 +367,7 @@ final OutputStream hos = new HexOutputStream(null, null) {
 include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexOutputStream.java[lines=50..60]
 ----
 <1> `buf` 가 `null` 이면 두개의 hex 문자를 담을수 있을 만큼의 크기로 생성한다.
-<2> `HexEncoder` 인터페이스의 `encodeOctet(int, ByteBuffer)` 메서드를 이용해 주어진 바이트를 변환한다.
+<2> `HexEncoder#encodeOctet(int, ByteBuffer)` 메서드를 이용해 주어진 바이트를 변환한다.
 <3> 변환된 두개의 문자들을 `out` 에 기록한다.
 
 [CAUTION]
@@ -406,7 +400,7 @@ public void close() throws IOException {
     }
 }
 ----
-<1> `ostream` 이 `null` 이면 `close()` 를 호출하지 않는다.
+<1> `ostream` 이 `null` 이면 `close()` 메서드를 호출하지 않는다.
 <2> `flush()` 는 호출된다.
 ====
 
@@ -436,16 +430,14 @@ public class HexInputStream extends FilterInputStream {
 
 ===== InputStream#available()
 
-블럭(blocked)되지 않고 한번에 읽을 수 있는 (혹은 건너 뛸 수 있는) 바이트 개수를 반환한다. 스트림의 끝(`end-of-stream`)에 도달한 상태라면 `0` 을 반환한다. (어떤 서브클래스들은 `close()` 메서드를 통해 닫혔을 경우 `IOException` 을 던질 수도 있다.)
+블럭(blocked)되지 않고 한번에 읽을 수 있는 (혹은 건너 뛸 수 있는) 바이트의 개수를 반환한다. 스트림의 끝(`end-of-stream`)에 도달한 상태라면 `0` 을 반환한다. (어떤 서브클래스들은, `close()` 메서드를 통해 닫혔을 경우, `IOException` 을 던질 수도 있다.)
 
-{apidocs-javase}/java/io/FilterInputStream.html#available--[`FilterInputStream#available()`] 메서드는 `in` 객체의 `available()` 값을 반환한다.
-
-`HexInputStream` 클래스는 그 절반에 해당하는 값을 반환하도록 재정의되었다. (두 개의 바이트를 읽고 하나로 변환하므로 가용한 바이트의 개수도 반으로 줄였다.)
+{apidocs-javase}/java/io/FilterInputStream.html#available--[`FilterInputStream#available()`] 메서드는 `in` 객체의 `available()` 값을 반환한다. `HexInputStream` 클래스는 그 절반에 해당하는 값을 반환하도록 재정의되었다. (두 개의 바이트를 읽고 하나로 변환하므로 가용한 바이트의 개수도 반으로 줄였다.)
 
 [source,java]
 .HexInputStream.java#available()
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=54..57]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=55..58]
 ----
 
 [CAUTION]
@@ -455,7 +447,7 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInp
 [source,java]
 .WrongIoUtil.java#copy(File,File)
 ----
-static void dangerous_copy(final File src, final File dst) throws IOException {
+void dangerous(final File src, final File dst) throws IOException {
     try(InputStream in = new FileInputStream(src)) {
         try(OutputStream out = new FileOutputStream(dst)) {
             final byte[] buf = new byte[in.available()]; // <1>
@@ -474,22 +466,18 @@ static void dangerous_copy(final File src, final File dst) throws IOException {
 
 스트림을 닫고 사용되고 있는 리소스들을 해제한다.
 
-{apidocs-javase}/java/io/FilterInputStream.html#close--[`FilterInputStream#cloes()`] 메서드는 `in` 객체에 `close()` 메서드를 호출한다.
-
-`HexInputStream` 클래스는 별도로 재정의하지 않는다.
+{apidocs-javase}/java/io/FilterInputStream.html#close--[`FilterInputStream#cloes()`] 메서드는 `in` 객체에 `close()` 메서드를 호출한다. `HexInputStream` 클래스는 별도로 재정의하지 않는다.
 
 ===== InputStream#mark(int readlimit)
 
 현재 위치를 표시(mark)한 후 `reset()` 메서드를 통해 다시 그 위치부터 읽을 수 있게 한다. `reset()` 메서드를 호출하기 전에 `readlimit` 보다 많은 바이트들이 소비되면 표시가 무효화(invalidate)된다.
 
-{apidocs-javase}/java/io/FilterInputStream.html#mark-int-[`FilterInputStream#mark(int)`] 메서드는 주어진 값을 `in` 객체의 `mark(int)` 메서드에 전달한다.
-
-`HexInputStream` 클래스는 다음과 같이 주어진 값의 두 배에 해당하는 값을 사용하도록 재정의되었다.
+{apidocs-javase}/java/io/FilterInputStream.html#mark-int-[`FilterInputStream#mark(int)`] 메서드는 주어진 값을 `in` 객체의 `mark(int)` 메서드에 전달한다. `HexInputStream` 클래스는 다음과 같이 주어진 값의 두 배에 해당하는 값을 사용하도록 재정의되었다.
 
 [source,java]
 .HexInputStream.java#mark(int)
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=69..72]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=70..73]
 ----
 CAUTION: `readlimit` 의 값이 `Integer.MAX_VALUE / 2` 보다 클 경우의 결과는 예상할 수 없다.
 
@@ -517,20 +505,19 @@ CAUTION: `readlimit` 의 값이 `Integer.MAX_VALUE / 2` 보다 클 경우의 결
 
 `mark()` 메서드와 `reset()` 메서드를 지원하는지 확인한다.
 
-{apidocs-javase}/java/io/FilterInputStream.html#markSupported--[`FilterInputStream#markSupported()`] 메서드는 `in` 객체의 `markSupported()` 값를 반환한다.
-
-`HexInptuStream` 클래스는 별도로 재정의하지 않았다.
+{apidocs-javase}/java/io/FilterInputStream.html#markSupported--[`FilterInputStream#markSupported()`] 메서드는 `in` 객체의 `markSupported()` 값를 반환한다. `HexInptuStream` 클래스는 별도로 재정의하지 않았다.
 
 ===== InputStream#read()
 
 바이트 하나를 읽는다. 반환되는 값은 `0` 부터 `255` 까지의 양수이다. 스트림의 끝(`end-of-stream`) 에 도달했으면 `-1` 을 반환한다. 이 메서드는 유효한 데이터가 준비될 때까지 블럭된다.
 
-{apidocs-javase}/api/java/io/FilterInputStream.html#read--[`FilterInputStream#read()`] 메서드는 `in` 객체의 `read()` 메서드 값을 반환한다. `HexInputStream` 클래스는 아래와 같이 바이트 두 개를 읽어서 하나로 변환한 후 반환하도록 재정의되었다.
+{apidocs-javase}/java/io/FilterInputStream.html#read--[`FilterInputStream#read()`] 메서드는 `in` 객체의 `read()` 메서드가 반환하는 값을 반환한다. `HexInputStream` 클래스는 아래와 같이 바이트 두 개를 읽어서 하나로 변환한 후 반환하도록 재정의되었다.
 
 [source,java]
 .HexInputStream.java#read()
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=83..102]
+    // 두 개의 문자를 읽어서 하나의 숫자로 변환한 후 반환한다.
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=84..103]
 ----
 <1> `buf` 의 값이 아직 `null` 이면 두개의 hex 문자를 담을 수 있을 만큼의 크기로 생성한다.
 <2> 첫번째 바이트를 읽고 `buf` 에 담는다. 그 값이 `-1` 이면 `-1` 을 반환한다.
@@ -541,12 +528,18 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInp
 
 주어진 배열의 첫 번째 위치부터 (최대) 배열의 길이만큼 바이트를 읽은 후 실제로 읽힌 바이트 개수를 반환한다. 이미 스트림의 끝(`end-of-stream`)에 도달했다면 `-1` 을 반환한다. 배열의 크기보다 작은 수 많큼 읽힐 수도 있다. 이 메서드는 유효한 데이터가 준비될 때까지 블럭된다. `b` 의 길이(`length`) 가 `0` 이면 `0` 을 반환한다. `read(b, 0, b.length)` 를 호출한 것과 같은 효과를 가진다.
 
-{apidocs-javase}/java/io/FilterInputStream.html#read-byte:A-[`FilterInputStream#read(byte[\])`] 메서드는 `read(byte[],int,int)` 메서드에 `b`, `0`, `b.length` 를 전달하고 그 결과값을 반환한다. `HexInputStream` 클래스는 별도로 재정의하지 않았다.
 
 [CAUTION]
 ====
 주어진 배열(`b`)의 길이(`length`)가 `0` 이면 스트림의 끝(`end-of-stream`)에 도달한 것과는 상관없이 무조건 `0` 을 반환할 수 있다는 것에 주의하자.
 ====
+
+[NOTE]
+====
+전달될 배열의 길이가 `0` 보다 크다면 `0` 을 반환하지 않는다. (적어도 한 개 이상의 바이트가 읽힐 때까지 블럭된다.)
+====
+
+{apidocs-javase}/java/io/FilterInputStream.html#read-byte:A-[`FilterInputStream#read(byte[\])`] 메서드는 `read(byte[], int, int)` 메서드에 `b`, `0`, `b.length` 를 전달하고 그 결과값을 반환한다. `HexInputStream` 클래스는 별도로 재정의하지 않았다.
 
 ===== InputStream#read(byte[] b, int off, int len)
 
@@ -557,7 +550,7 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInp
 [source,java]
 .HexInputStream.java#read(byte[],int,int)
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=117..138]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=118..139]
 ----
 <1> `len` 만큼 `read()` 메서드가 반환하는 값으로 배열의 값을 변경한다. `read()` 메서드가 `-1` 을 반환하기 전까지 반복한다. 첫 번째 호출이 `-1` 을 반환하면 `-1` 을 반환한다.
 
@@ -588,9 +581,9 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInp
 [source,java]
 .HexInputStream.java#skip(long)
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=151..161]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInputStream.java[lines=152..162]
 ----
-<1> `n` 의 두 배에 해당하는 값 만큼 사도한다.
+<1> `n` 의 두 배에 해당하는 값 만큼 시도한다.
 <2> 실제로 건너뛴 개수가 홀수이면 하나를 더 읽어서 버린다.
 <3> 실제로 건너 뛴 바이트 개수의 절반에 해당하는 값을 반환한다.
 
@@ -641,11 +634,11 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/Filter
 [source,java]
 .WritableFilterChannel.java
 ----
-public class WritableFilterChannel<>
+public class WritableFilterChannel
         extends FilterChannel<WritableFilterChannel>
         implements WritableByteChannel {
 
-    public WritableFilterChannel(final WritableFilterChannel channel) {
+    public WritableFilterChannel(final WritableByteChannel channel) {
         super(channel);
     }
 }
@@ -747,12 +740,14 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/Writab
 ----
 public class ReadableHexChannel extends ReadableHexChannel {
 
-    public ReadableHexChannel(final T channel, final HexDecoder decoder) {
+    // 변환된 문자들을 읽을 채널
+    // 문자들을 숫자들로 변환하기 위한 디코더
+    public ReadableHexChannel(final ReadableByteChannel channel,
+                              final HexDecoder decoder) {
         super(channel);
         this.decoder = decoder;
     }
 
-    // 문자를 숫자로 변활할 때 사용할 디코더
     protected HexDecoder decoder;
 }
 ----
@@ -795,8 +790,7 @@ default void encode(final byte[] inarr, final int inoff, final int inlen,
 default void decode(final byte[] inarr, final int inoff, final int inlen,
                     final byte[] outarr, final int outoff) {
     // @todo: implement
-    // 인자들의 유효성을 검증하자.
-    // inlen 이 홀수이면 유효한 값일까?
+    // 인자들의 유효성을 검증하자. inlen 이 홀수이면 유효한 값일까?
     // outarr 의 outoff 부터 최소한 몇 개의 배열공간이 필요할까?
 }
 ----
@@ -842,7 +836,7 @@ include::codes/hex-codec-lib/src/main/java/com/github/jinahya/verbose/hex/HexEnc
 
 ===== encodeOctet(int, ByteBuffer)
 
-이제 `encodeOctet(int, ByteBuffer)` 를 다음과 같이 구현할 수 있다.
+이제 `encodeOctet(int, ByteBuffer)` 메서드를 다음과 같이 구현할 수 있다.
 
 [source,java]
 .HexEncoderImpl.java#encodeOctet(int,ByteBuffer)
@@ -1125,7 +1119,7 @@ public class HexStreamTest {
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=28..34]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=28..35]
 ----
 <1> VM 이 종료될 때 파일을 삭제한다.
 
@@ -1134,7 +1128,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStr
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=35..44]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=36..45]
 ----
 
 또 다른 파일(`decoded`)에 `HexInputStream` 클래스를 이용하여 복사한다. (디코드한다.)
@@ -1142,7 +1136,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStr
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=45..54]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=46..55]
 ----
 
 세 개의 파일들은 각각의 크기가 다음의 조건을 만족한다.
@@ -1150,7 +1144,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStr
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=55..56]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=56..57]
 ----
 
 처음 생성한 파일(`created`)과 마지막의 디코드된 파일(`decoded`)의 내용을 비교한다.
@@ -1158,7 +1152,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStr
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=57..61]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=58..62]
 ----
 
 ==== HexChannelTest.java
@@ -1239,7 +1233,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexCha
 === Exercises
 . `HexEncoderImpl#encodeNible(int)` 과 `HexDecoderImpl#decodeNibble(int)` 의 `switch` 구문을 `if/else` 구문으로 바꿔보자.
 +
-. 시험 클래스를 하나 추가하고 클래스 파일의 처음 4 개의 바트드들을 `base16` 으로 출력해 보자.
+. 시험 클래스를 하나 추가하고 클래스 파일의 처음 4 개의 바이트들을 `base16` 으로 출력해 보자.
 +
 [source,java]
 .ClassFileTest.java#magic()

@@ -17,6 +17,6 @@ package com.github.jinahya.verbose.reflect;
 
 public interface CelsiusThermometer {
 
-    // 현재 온도를 반환한다. 단위는 섭씨(fahrenheit)이다.
+    // 현재 온도를 반환한다. 단위는 섭씨(celsius)이다.
     float getTemperatureInCelsius();
 }

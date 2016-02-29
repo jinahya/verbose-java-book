@@ -27,13 +27,12 @@ import javax.inject.Inject;
 @Stateless
 public class TemperatureSchedules {
 
-    private static Method GET_TEMPERATURE_IN_FAHRENHEIT;
+    private static Method TARGET;
 
     static {
         try {
-            GET_TEMPERATURE_IN_FAHRENHEIT
-                    = FahrenheitThermometer.class.getMethod(
-                            "getTemperatureInFahrenheit");
+            TARGET = FahrenheitThermometer.class.getMethod(
+                    "getTemperatureInFahrenheit");
         } catch (final NoSuchMethodException nsme) {
             throw new InstantiationError(nsme.getMessage());
         }
@@ -77,7 +76,7 @@ public class TemperatureSchedules {
                         FahrenheitThermometer.class.getClassLoader(),
                         new Class<?>[]{FahrenheitThermometer.class},
                         (p, m, a) -> {
-                            if (m.equals(GET_TEMPERATURE_IN_FAHRENHEIT)) {
+                            if (m.equals(TARGET)) {
                                 return celsius.getTemperatureInCelsius()
                                        * 1.8f + 32;
                             }
