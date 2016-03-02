@@ -73,6 +73,7 @@ public interface HelloWorld {
     // 주어진 퍼버에 hello, world 바이트들을 담은 후 그 버퍼를 반환한다.
     // 버버에 충분한 공간이 없으면 BufferOverflowException 을 던진다.
     // 버퍼의 위치(position) 값이 BYTES 만큼 증가된다.
+    // 주어진 버퍼(buffer)를 반환한다.
 include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/HelloWorld.java[lines=68..83]
 ----
 <1> `buffer` 인자가 `null` 이면 `NullPointerException` 을 던진다.
@@ -91,7 +92,7 @@ include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/He
 ----
 <1> `stream` 인자가 `null` 이면 `NullPointerException` 을 던진다.
 <2> 배열을 생성하고 `set(byte[], int)` 메서드를 이용해 값을 채운다.
-<3> `OutputStream#write(byte[])` 메서드를 이용해 스트림에 기록한다.
+<3> {apidocs-javase}/api/java/io/OutputStream.html#write-byte:A-[`OutputStream#write(byte[\])`] 메서드를 이용해 스트림에 기록한다.
 
 ===== wirte(WritableByteChannel)
 
@@ -105,7 +106,7 @@ include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/He
 <2> 버퍼를 생성하고 `put(ByteBuffer)` 메서드를 이용해 값을 채운다.
 <3> 버퍼에 값이 남아있는 동한 `channel` 에 기록한다.
 
-NOTE: `WritableByteChannel` 을 상속한 클래스들 중에는 내부적인 상태 혹은 설정에 따라 http://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html#write-java.nio.ByteBuffer-[`write(ByteBuffer)`] 메서드에서 버퍼 모든 바이트들을 한번에 기록하지 않을 수도 있다.
+NOTE: {apidocs-javase}/api/java/nio/channels/WritableByteChannel.html[`WritableByteChannel`] 인터페이스를 구현한 클래스들 중에는 내부적인 상태 혹은 설정에 따라 http://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html#write-java.nio.ByteBuffer-[`write(ByteBuffer)`] 메서드에서 버퍼 모든 바이트들을 한번에 기록하지 않을 수도 있다.
 
 ==== HelloWorldTest.java
 인터페이스를 위한 단위시험을 수행한다는 것이 의외일 수도 있지만 `HelloWorld` 인터페이스에 구현된 `default` 메서드들이 정상적으로 동작하는지 미리 확인해 둘 필요가 있다.
@@ -209,7 +210,7 @@ include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/He
 ----
 assertThrows(NullPointerException.class, new ThrowingRunnable() {
     @Override public void run() throws Throwable {
-        impl().put(null);
+        mock().put(null);
     }
 });
 ----
@@ -219,7 +220,7 @@ assertThrows(NullPointerException.class, new ThrowingRunnable() {
 [source,java]
 ----
 assertThrows(NullPointerException.class, () -> {
-    impl().put(null);
+    mock().put(null);
 });
 ----
 
@@ -227,9 +228,9 @@ assertThrows(NullPointerException.class, () -> {
 
 [source,java]
 ----
-assertThrows(NullPointerException.class, () -> impl().put(null)); // <1>
+assertThrows(NullPointerException.class, () -> mock().put(null)); // <1>
 ----
-<1> `impl().put(null)` 바로 뒤에 서술문의 끝을 나타내는 세미콜론(`;`)이 없다.
+<1> `mock().put(null)` 바로 뒤에 서술문의 끝을 나타내는 세미콜론(`;`)이 없다.
 ====
 
 ===== testWriteWithStream()
@@ -405,7 +406,7 @@ $
 다음 항목은 `offset` 이 음수인 경우에 대한 시험 항목이다.
 
 [source,java]
-.HelloWorldImplTest.java#expectIndexOutOfBoundsExceptionWhenOffsetIsNegative
+.HelloWorldImplTest.java#expectIndexOutOfBoundsExceptionWhenOffsetIsNegative()
 ----
 include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldImplTest.java[lines=50..55]
 ----
@@ -460,7 +461,7 @@ $
 다음은 배열 공간이 충분하지 않을 경우에 대한 시험항목이다.
 
 [source,java]
-.HelloWorldImplTest.java#expectIndexOutOfBoundsExceptionWhenCapacityIsNotEnough
+.HelloWorldImplTest.java#expectIndexOutOfBoundsExceptionWhenCapacityIsNotEnough()
 ----
 include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldImplTest.java[lines=62..67]
 ----
@@ -520,7 +521,7 @@ $
 
 이제 마지막으로 모든 인자가 유효한 경우에 정상적으로 동작하는 것을 확인하는 시험 항목을 작성하고 (실패하는 것을 확인한 뒤) 해당 항목을 구현하자.
 
-.HelloWorldImplTest#expectHelloWorldBytesSetOnArrayStartingAtOffset
+.HelloWorldImplTest#expectHelloWorldBytesSetOnArrayStartingAtOffset()
 [source,java]
 ----
 include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldImplTest.java[lines=73..90]
@@ -577,16 +578,16 @@ $
 ----
 
 ==== HelloWorldDataProvider.java
-지금까지 우리는 `HelloWorldImplTest` 에서 `HelloWorldImpl` 의 기능을 시험하기 위해 (각각의 단위 시험 항목에서) 다음과 같은 작업을 수행했다.
+지금까지 우리는 `HelloWorldImpl` 클래스의 기능을 시험하기 위해 (각각의 단위 시험 항목에서) 다음과 같은 작업을 수행했다.
 
 - 시험 항목의 목적에 해당하는 `array` 와 `offset` 을 준비한다.
 - `HelloWorldImpl` 형의 객체를 하나 생성하고 `set(array, offset)` 메서드를 호출한다.
 
-지금부터는 위에 정리된 **단위 시험 항목에서 사용할 데이터를 제공**하는 방법과 **시험을 수행할 객체를 생성**하는 방법에 대해서 알아보려 한다.
+지금부터는 **단위 시험 항목에서 사용할 데이터를 제공**하는 방법과 **시험을 수행할 객체를 생성**하는 방법에 대해서 알아보려 한다.
 
 TestNG에서 제공하는 데이터 제공자(Data Provider)를 사용하면 시험 항목에 필요한 **데이터를 인자로 제공**받을 수 있을 뿐만 아니라 **1개 이상의 시험 데이터**를 전달받아 여러 경우에 대해 테스트를 실행할 수 있다.
 
-`HelloWorld` 를 위한 시험 항목들이 사용할 시험 데이터를 제공하는 클래스를 만들어 보자.
+시험 데이터를 제공하는 클래스를 만들어 보자.
 
 [source,java]
 .HelloWorldDataProvider.java
@@ -598,7 +599,7 @@ class HelloWorldDataProvider {
 
 ===== provideArrayNull()
 
-다음은 `array` 가 `null` 인 경우를 위한 데이터를 제공하는 메서드이다. (`0` 보다 작지 않은) 유효한 `offset` 값을 제공한다.
+`array` 가 `null` 인 경우를 위한 데이터를 제공하는 메서드이다. (`0` 보다 작지 않은) 유효한 `offset` 값을 제공한다.
 
 [source,java]
 .HelloWorldDataProvider.java#provideArrayNull()
@@ -677,7 +678,7 @@ include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/He
 include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=84..89]
 ----
 
-이제 데이터 제공자와 단위 시험 항목들이 준비되었다. 다음은 `implemention()` 메서드를 구현하는 클래스들를 만들어보자.
+데이터 제공자와 단위 시험 항목들이 준비되었다. 이제 `implemention()` 메서드를 구현하는 클래스들를 만들어보자.
 
 [NOTE]
 ====
