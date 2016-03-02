@@ -9,7 +9,7 @@
 ----
     // input 에서 output 으로 데이터를 복사한다.
     // 복사된 바이트들의 개수를 반환한다.
-include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils1.java[lines=33..42]
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils1.java[lines=33..43]
 ----
 <1> (`0` 보다 큰 길이를 가지는) 버퍼를 하나 생성하고
 <2> `input` 객체의 {apidocs-javase}/java/io/InputStream.html#read-byte:A-[`InputStream#read(byte[\])`] 메서드에 버퍼를 전달해서 `-1`(`end-of-stream`) 이 반환되기 전까지
@@ -19,7 +19,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 {apidocs-javase}/java/io/InputStream.html#read-byte:A-[`InputStream#read(byte[\])`] 메서드의 설명을 잘 읽어 본 후 아래 코드에 대해 생각해 보자.
 [source,java]
 ----
-        for (int length; (length = input.read(buffer)) > 0; count += length)
+        for (int length; (length = input.read(buffer)) > 0;)
 ----
 ****
 
@@ -29,7 +29,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 .IoUtils1.java#copy(File, File)
 ----
     // source 에서 target 으로 데이터를 복사한다.
-include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils1.java[lines=60..67]
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils1.java[lines=61..68]
 ----
 <1> `flush()` 메서드를 명시적으로 호출하여 모든 데이터가 해당 파일에 기록되는 것을 보장한다.
 
