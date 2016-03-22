@@ -45,6 +45,9 @@ m|*boolean*  |                   |          |    |
 ****
 
 === N-bit signed two's-compliment integers
+
+자바의 `byte`, `short`, `int`, `long` 형은 각각 `8`, `16`, `32`, `64` 비트로 이루어져 있고 부호를 가지며 2의 보수체계를 사용한다.
+
 N개의 비트로 이루어져 있고 부호를 가지며 2의 보수체계를 사용하는 정수형로 표현할 수 있는 값의 범위는 무엇일까? 아래 세개의 비트를 가지고 실험해 보자. `000` 부터 시계방향으로 1씩 더하면서 계산해 보자.
 
 [source,text]
@@ -64,6 +67,14 @@ MIN  -4  100 \
 ****
 크기가 1 비트이고 부호를 가지며 2의 보수 체계를 사용하는 정수형으로 표현할 수 있는 최대값과 최소값은 무엇인가?
 ****
+
+****
+`char` 형은 `16` 비트로 이루어져 있고 부호를 사용하지 않는다. 각각의 값이 UTF-16 코드 단위를 표현한다.
+****
+
+=== IEEE 754 floating-point numbers
+
+자바의 `float` 형과 `double` 형은 https://standards.ieee.org/findstds/standard/754-1985.html[IEEE 754-1985] 에 정의된 단정도(single-precision, 32-bit)와 배정도(double-precision, 64-bit)를 표현한다.
 
 === hex-codec-api
 
