@@ -57,7 +57,7 @@ N개의 비트로 이루어져 있고 부호를 가지며 2의 보수체계를 �
          \ 000  0
   -1  111 \ 001  1
    -2  110 \ 010  2
-    -3  101 \ 011  3  MAX
+    -3  101 \ 011  3  MAX 2^3-1^-1
 MIN  -4  100 \
               +1
 ----
@@ -75,6 +75,32 @@ MIN  -4  100 \
 === IEEE 754 floating-point numbers
 
 자바의 `float` 형과 `double` 형은 https://standards.ieee.org/findstds/standard/754-1985.html[IEEE 754-1985] 에 정의된 단정도(single-precision, 32-bit)와 배정도(double-precision, 64-bit)를 표현한다.
+
+[cols=">1,>1,>1,>1,<1",frame="top",options="header"]
+.8-bit values
+|====
+|      |sign|exponent|mantissa|notes
+|32-bit|`1` |`8`     |`23`    | bias = `127`
+|64-bit|`1` |`11`    |`52`    | bias = `1023`
+|====
+
+----
+32-bit: SEEEEEEE EMMMMMMM MMMMMMMM MMMMMMMM
+64-bit: SEEEEEEE EEEEMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM
+----
+
+==== Normalized values
+`N = (-1)^S^ × 1.F × 2^(E-bais)^`
+
+===== 3.14
+
+===== 2.71
+
+==== Denormalized values
+
+==== Special values
+===== Infinity
+===== Not a Number
 
 === hex-codec-api
 

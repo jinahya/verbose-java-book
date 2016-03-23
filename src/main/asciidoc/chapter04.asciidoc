@@ -1,4 +1,7 @@
+include::variables.asciidoc[]
 == Verbose Utilities
+
+이후의 장들에서 사용할 기능들에 대해서 간단하게 짚고 넘어가도록 하겠다.
 
 === Copying Streams, Channels, Files, and Paths
 
@@ -288,4 +291,3 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 ----
 <1> 프록시 객체를 생성한다.
 <2> 해당 형으로 변환하여 반환한다.
-
