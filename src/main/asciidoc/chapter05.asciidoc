@@ -74,17 +74,17 @@ MIN  -4  100 \
 
 === IEEE 754 floating-point numbers
 
-자바의 `float` 형과 `double` 형은 https://standards.ieee.org/findstds/standard/754-1985.html[IEEE 754-1985] 에 정의된 단정도(single-precision, 32-bit)와 배정도(double-precision, 64-bit)를 표현한다. 각각의 형은 한 개의 sign bit과 지수를 지수를 표현하는 부분(exponent) 그리고 가수를 표현하는 부분(fraction)으로 구성된다.
+자바의 `float` 형과 `double` 형은 https://standards.ieee.org/findstds/standard/754-1985.html[IEEE 754-1985] 에 정의된 단정도(single-precision, 32-bit)와 배정도(double-precision, 64-bit)를 표현한다. 각각의 형은 한 개의 sign bit과 지수를 표현하는 부분(exponent) 그리고 가수를 표현하는 부분(fraction)으로 구성된다.
 
 [cols=">2,>1,>1,>1,<1",frame="topbot",options="header"]
-.IEEE Std 744-1985 Single/Double Precesion
+.IEEE Std 744-1985 Single/Double Precision
 |====
 |                       |sign|exponent|fraction|notes
-|32-bit single precision|`1` |`8`     |`23`    | bias = `127`
-|64-bit double precision|`1` |`11`    |`52`    | bias = `1023`
+|32-bit single precision|`1` |`8`     |`23`    |bias = `127`
+|64-bit double precision|`1` |`11`    |`52`    |bias = `1023`
 |====
 
-각각의 단위를 비트별로 표현하면 다음과 같다.
+각각의 부분을 비트별로 표현하면 다음과 같다.
 ----
 32-bit: seeeeeee efffffff ffffffff ffffffff
 64-bit: seeeeeee eeeeffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff
@@ -115,11 +115,11 @@ s = 1        F = 0*(1/2) + 1*(1/4) + 1*(1/8) = 0.375
  ------- ----
  exponent = 1022
 ----
-표현된 실수는 `(-1)^1^ * (1+0.375) * 2^(1022-1023)^ = -1 * 1.375 * 2^-1^ = -0.6875` 이다.
+표현된 실수는 `(-1)^1^ * (1.0+0.375) * 2^(1022-1023)^ = -1 * 1.375 * 2^-1^ = -0.6875` 이다.
 
 ==== Denormalized values
 
-앞서 살펴 본 정규화된(normalized) 형식에서는 `0.0` 을 표현할 수 없다. 아래와 같이 표현했다고 할지라도 암묵적으로 가수(fraction) 부분에 더해지는 값(`1.0`) 때문에
+앞서 살펴 본 정규화된(normalized) 형식에서는 `0.0` 을 포함하여 `-1.0` 보다 크고 `+1.0` 보다 작은 수들을 표현할 수 없다. 아래와 같이 표현했다고 할지라도, 암묵적으로 가수(fraction) 부분에 더해지는 값(`1.0`) 때문에,
 ----
 S = 0     F = 0.0
 -         ------- -------- --------
@@ -127,12 +127,14 @@ S = 0     F = 0.0
  ------- -
  exponent = 127
 ----
-실제로 표현된 값은 `(-1)^0^ * (1+0.0) * 2^(127-127)^ = 1 * 1.0 * 2^0^ = 1.0` 이다.
+실제로 표현된 값은 `(-1)^0^ * (1.0+0.0) * 2^(127-127)^ = 1 * 1.0 * 2^0^ = 1.0` 이다.
 
-이를 해결하기 위해 exponent를 구성하는 비트들이 모두 `0` 일 경우 비정규화된(denormalized) 값으로 구분되며 `I` 의 값으로 `0.0` 을 사용하고 `E = 1 - bias` 이다.
+이를 해결하기 위해 exponent를 구성하는 비트들이 모두 `0` 일 경우 비정규화된(denormalized) 값으로 구분하며 `I` 의 값으로 `0.0` 을 사용하고 `E = 1 - bias` 이다.
 
 ===== &#177;Zero
-흥미롭게도 sign bit 에 따라서 `+0.0` 과 `-0.0` 을 따로 표현할 수 있다. 다음의 값을 실수로 계산해 보면
+
+exponent 부분의 비트들이 모두 `0` 이고 fraction 부분의 비트들도 모두 `0` 이면 `0.0` 을 나타낸다. 흥미롭게도 sign bit 에 따라서 `+0.0` 과 `-0.0` 을 따로 표현할 수 있다. 다음의 값을 실수로 계산해 보면
+
 ----
 s = ?     fraction = 0....0
 -         ------- -------- --------
@@ -143,10 +145,13 @@ s = ?     fraction = 0....0
 표현하는 값은 `(-1)^s^ * (0.0 + 0.0) * 0^(1-127)^ = 0.0` 이고 `s` 가 `0` 이면 `+0.0`, `s` 가 `1` 이면 `-0.0` 이다.
 
 ==== Special values
+
 exponent 부분을 구성하는 비트들이 모두 `1` 이면 특별한 수를 나타낸다.
 
 ===== &#177;Infinity(&#8734;)
+
 exponent 부분을 구성하는 비트들이 모두 `1` 이고 fraction 부분의 비트들이 모두 `0` 이면 무한대의 수를 나타낸다. Zero와 마찬가지로 sign 비트에 따라서 양의 무한대(+&#8734;)와 음의 무한대(-&#8734;)를 표현할 수 있다.
+
 ----
 s = ?     fraction = 0...0
 -         ------- -------- --------
@@ -155,27 +160,110 @@ s = ?     fraction = 0...0
  exponent = 1...1
 ----
 
-===== Not a Number
-exonent 부분을 구성하는 비트들이 모두 `1` 이고 fraction 부분의 비트들중 하나라도 `1` 이면 논리적으로 표현할 수 없는 수를 나타낸다. (fraction 비트들이 모두 `0` 이면 Infinity이다.)
+===== NaN
 
-.Float#NaN
+exponent 부분을 구성하는 비트들이 모두 `1` 이고 fraction 부분의 비트들중 하나라도 `1` 이면 표현할 수 없는 수(Not a Number)를 나타낸다. (fraction 비트들이 모두 `0` 이면 Infinity이다.)
+
+.NaN
 ----
-s = ?     fraction = 1...0
+s = ?     fraction = ...... (!= 0)
 -         ------- -------- --------
-?1111111 11000000 00000000 00000000
+?1111111 1??????? ???????? ????????
  ------- -
  exponent = 1...1
 ----
 
-==== Float#toIntBits(float) / Flaot#toRawIntBits(float)
+다음은 {apidocs-javase}/java/lang/Float.html#NaN[`java.lang.Float#NaN`] 과 {apidocs-javase}/java/lang/Double.html#NaN[`java.lang.Double#NaN`] 을 이진수로 표기한 내용이다.
 
+.java.lang.Float#NaN
+----
+s = 0     fraction = 10...0
+-         ------- -------- --------
+01111111 11000000 00000000 00000000
+ ------- -
+ exponent = 1...1
+----
+
+.java.lang.Double#NaN
+----
+s = 0        fraction = 10...0
+-            ---- -------- -------- -------- -------- -------- --------
+01111111 11111000 00000000 00000000 00000000 00000000 00000000 00000000
+ ------- ----
+ exponent = 1...1
+----
+
+NaN 도 두가지 형태로 구분할 수 있다. fraction 부분의 첫번째 비트가 `0` 이면 예외상황을 나타내는 signaling NaN 이고 `1` 이면 quiet NaN 이다. (위에서 살펴본 `Float#NaN` 과 `Double#NaN` 은 quiet NaN이다.)
+
+.signaling NaN
+----
+s = ?     fraction = 0...1...
+-         _------ -------- --------
+?1111111 10000000 00000000 00000001
+?1111111 10000000 00000000 00000010
+?1111111 10000000 00000000 00000011
+?1111111 10...... ........ ........
+?1111111 10111111 11111111 11111101
+?1111111 10111111 11111111 11111110
+?1111111 10111111 11111111 11111111
+ ------- -
+ exponent = 1...1
+----
+
+.quiet NaN
+----
+s = ?     fraction = 1...
+-         _------ -------- --------
+?1111111 11000000 00000000 00000000
+?1111111 11000000 00000000 00000001
+?1111111 11000000 00000000 00000010
+?1111111 11...... ........ ........
+?1111111 11111111 11111111 11111101
+?1111111 11111111 11111111 11111110
+?1111111 11111111 11111111 11111111
+ ------- -
+ exponent = 1...1
+----
+
+==== java.lang.Float
+
+다음은 `&#177;.0f` 과 {apidocs-javase}/java/lang/Float.html[`java.lang.Float`] 클래스에 정의된 상수들을 2진법으로 출력한 내용이다. (보는 바와 같이 `java.lang.Float.NaN` 은 quiet NaN 이다.)
+
+.Zeros and Constants defined in java.lang.Float
+----
+1 00000000 00000000000000000000000 -0.000000e+00 -.0f
+0 00000000 00000000000000000000000 +0.000000e+00 +.0f
+0 11111110 11111111111111111111111 +3.402823e+38 Float.MAX_VALUE
+0 00000000 00000000000000000000001 +1.401298e-45 Float.MIN_VALUE
+0 00000001 00000000000000000000000 +1.175494e-38 Float.MIN_NORMAL
+1 11111111 00000000000000000000000 -Infinity     Float.NEGATIVE_INFINITY
+0 11111111 00000000000000000000000 +Infinity     Float.POSITIVE_INFINITY
+0 11111111 10000000000000000000000 NaN           Float.NaN
+----
+
+===== floatToIntBits(float) / floatToRawIntBits(float)
+
+앞서 설명했듯이 NaN 에 해당하는 값은 하나가 아니다. (exponent 부분이 모두 `1` 이고 fraction 부분에 하나 이상의 `1` 이 포함되어 있으면 모두 NaN 이다.) {apidocs-javase}/java/lang/Float.html#floatToIntBits-float-[`Float#floatToIntBits(float)`] 메서드는 주어진 수가 NaN 일 경우 `Float#NaN`(`0x7fc00000`, `0b01111111_11000000_00000000_00000000`) 로 변환하고 {apidocs-javase}/java/lang/Float.html#floatToRawIntBits-float-[`Float#floaToRawIntBits(float)`] 메서드는 비트정보를 잃지 않고 그대로 변환한다.
+
+[source,java]
+----
+float f = intBitsToFloat(0b11111111_10011011_11100011_01111100); // NaN
+int i1 = floatToIntBits(f);
+int i2 = floatToRawIntBits(f);
+System.out.printf("   floatToIntBits: 0x%08x\n", i1);
+System.out.printf("floatToRawIntBits: 0x%08x\n", i2);
+----
+----
+   floatToIntBits: 0x7fc00000
+floatToRawIntBits: 0xff9be37c
+----
 
 === hex-codec-api
 
-거의 모든 컴퓨터들은 자료를 저장할 때, `octet` 으로 불리는, 여덟개의 비트로 구성된 최소 단위의 숫자들로 나누어 저장한다. 'a' 라는 문자는 (`US-ASCII` 로 인코딩 되었을 때) `01100001` 로, '홍' 이라는 문자는 (`UTF-8` 로 인코딩 되었을 때) `111011011 00110011 0001101` 로 저장된다. 아래 표에 여덟개의 비트로 표현할 수 있는 몇몇 값들을 10진법, 8진법, 2진법, 그리고 자바의 `byte` 값으로 표현하였다.
+거의 모든 컴퓨터들은 자료를 저장할 때, `octet` 으로 불리는, 여덟개의 비트로 구성된 최소 단위의 숫자들로 나누어 저장한다. `a` 라는 문자는 (`US-ASCII` 로 인코딩 되었을 때) `01100001` 로, `홍` 이라는 문자는 (`UTF-8` 로 인코딩 되었을 때) `111011011 00110011 0001101` 로 저장된다. 아래 표에 여덟개의 비트로 표현할 수 있는 몇몇 값들을 10진법, 8진법, 2진법, 그리고 자바의 `byte` 값으로 표현하였다.
 
-[cols=">1,>1,>1,>1,<2",frame="top",options="header"]
-.8-bit values
+[cols=">1,>1,>1,>1,<2",frame="topbot",options="header"]
+.some 8-bit values
 |====
 |base10|base8|base2     |byte  |notes
 |   `0`|  `0`|       `0`|   `0`|
@@ -204,7 +292,7 @@ Byte.MIN_VALUE  -128  10000000 \
                                 +1
 ----
 
-거의 모든 문자셋의 기본이 되는 `US-ASCII` 문자셋에는 줄바뀜(CR, LF), 탭(TAB) 등의 제어 문자들과 보통의 자판에서 찾아볼 수 있는 문자들을 포함하여 `128`(`2^7^`)개의 코드가 정의되어 있다. 때문에 여덟개의 비트로 표현할 수 있는 `256`(`2^8^`)개의 수에 모든 문자를 할당하는 것이 불가능하다. 이를 해결하는 방법 중에 하나가 `base16`(`hex`) 로 표현하는 것이다. `base16` 표기는 여덟 개의 비트를 네 개씩 두 그룹으로 나눈 후에 각 그룹의 값을 미리 정의된 문자들 중 하나로 표현한다.
+거의 모든 문자셋의 기본이 되는 `US-ASCII` 문자셋에는 줄바뀜(CR, LF), 탭(TAB) 등의 제어 문자들과 보통의 자판에서 찾아볼 수 있는 문자들을 포함하여 `128`(`2^7^`)개의 코드가 정의되어 있다. 때문에 여덟개의 비트로 표현할 수 있는 `256`(`2^8^`)개의 수에 고유의 문자를 할당하는 것이 불가능하다. 이를 해결하는 방법 중에 하나가 `base16`(`hex`) 로 표현하는 것이다. `base16` 표기는 여덟 개의 비트를 네 개씩 두 그룹으로 나눈 후에 각 그룹의 값을 미리 정의된 문자로 변환한다.
 
 우선 아래와 같이 여덟 개의 비트를 네 개씩 두 그룹으로 나눈다.
 
@@ -215,28 +303,28 @@ upper  H H H H
 lower          L L L L
 ----
 
-그리고 (네 개의 비트로 표현되는) 각 그룹의 값(`0` ~ `15`)을 아래 표에 정의된 열 여섯개의 문자들 중 하나로 변환한다. (한 개의 바이트가 두개의 문자로 변환된다.)
+그리고 (네 개의 비트로 구성되는) 각 그룹의 값(`0` ~ `15`)을 아래 표에 정의된 열 여섯개의 문자들 중 하나로 변환한다. (한 개의 바이트가 두개의 문자로 변환된다.)
 
-[cols=">, >, >, >", options="header"]
+[cols=">,>,>,>",frame="topbot",options="header"]
 .hexadecimal encoding/decoding
 |====
 |decoded binary|decoded value|encoded character|encoded value
-|           `0`|    `0 (0x0)`|            `'0'`|  `48 (0x30)`
-|           `1`|    `1 (0x1)`|            `'1'`|  `49 (0x31)`
-|          `10`|    `2 (0x2)`|            `'2'`|  `50 (0x32)`
-|          `11`|    `3 (0x3)`|            `'3'`|  `51 (0x33)`
-|         `100`|    `4 (0x4)`|            `'4'`|  `52 (0x34)`
-|         `101`|    `5 (0x5)`|            `'5'`|  `53 (0x35)`
-|         `110`|    `6 (0x6)`|            `'6'`|  `54 (0x36)`
-|         `111`|    `7 (0x7)`|            `'7'`|  `55 (0x37)`
-|        `1000`|    `8 (0x8)`|            `'8'`|  `56 (0x38)`
-|        `1001`|    `9 (0x9)`|            `'9'`|  `57 (0x39)`
-|        `1010`|   `10 (0xA)`|            `'A'`|  `65 (0x41)`
-|        `1011`|   `11 (0xB)`|            `'B'`|  `66 (0x42)`
-|        `1100`|   `12 (0xC)`|            `'C'`|  `67 (0x43)`
-|        `1101`|   `13 (0xD)`|            `'D'`|  `68 (0x44)`
-|        `1110`|   `14 (0xE)`|            `'E'`|  `69 (0x45)`
-|        `1111`|   `15 (0xF)`|            `'F'`|  `70 (0x46)`
+|           `0`|`0 (0x0)`    |`'0'`            |`48 (0x30)`
+|           `1`|`1 (0x1)`    |`'1'`            |`49 (0x31)`
+|          `10`|`2 (0x2)`    |`'2'`            |`50 (0x32)`
+|          `11`|`3 (0x3)`    |`'3'`            |`51 (0x33)`
+|         `100`|`4 (0x4)`    |`'4'`            |`52 (0x34)`
+|         `101`|`5 (0x5)`    |`'5'`            |`53 (0x35)`
+|         `110`|`6 (0x6)`    |`'6'`            |`54 (0x36)`
+|         `111`|`7 (0x7)`    |`'7'`            |`55 (0x37)`
+|        `1000`|`8 (0x8)`    |`'8'`            |`56 (0x38)`
+|        `1001`|`9 (0x9)`    |`'9'`            |`57 (0x39)`
+|        `1010`|`10 (0xA)`   |`'A'`            |`65 (0x41)`
+|        `1011`|`11 (0xB)`   |`'B'`            |`66 (0x42)`
+|        `1100`|`12 (0xC)`   |`'C'`            |`67 (0x43)`
+|        `1101`|`13 (0xD)`   |`'D'`            |`68 (0x44)`
+|        `1110`|`14 (0xE)`   |`'E'`            |`69 (0x45)`
+|        `1111`|`15 (0xF)`   |`'F'`            |`70 (0x46)`
 |====
 
 NOTE: `10` 부터 `15` 까지의 숫자를 소문자(`'a'` 부터 `'f'` 까지)로 변환해도 된다.
@@ -301,7 +389,7 @@ public interface HexEncoder {
 .HexEncoder.java#encode(ByteBuffer, ByteBuffer)
 ----
     // decoded 버퍼에 남아있는(remaining) 각각의 바이트들을 변환하고 그 결과를 encoded 버퍼에 담는다.
-    // decoded 버퍼에서 소비된(인코드 된) 바이트의 개수를 반환한다.
+    // decoded 버퍼에서 소비된(변환된) 바이트의 개수를 반환한다.
 include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexEncoder.java[lines=42..48]
 ----
 <1> `decoded` 버퍼의 현재 위치(`position`) 값을 기록해 둔다.
@@ -341,7 +429,7 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexEnc
 
 ==== HexDecoder.java
 
-`Base 16 Encoding` 으로 인코드된 문자들을 다시 숫자들로 변환하기 위한 인터페이스이다.
+`Base 16 Encoding` 으로 변환된 문자들을 다시 숫자들로 변환하기 위한 인터페이스이다.
 
 [source,java]
 .HexDecoder.java

@@ -29,7 +29,7 @@ import static java.util.Optional.ofNullable;
  */
 public class IEEE754S {
 
-    private static String ieee754s(final int value) {
+    static String ieee754s(final int value) {
         final String s = toBinaryString(value >>> 31); // 1
         final String e = format(
                 "%8s", toBinaryString((value << 1) >>> 24)); // 8
@@ -41,7 +41,7 @@ public class IEEE754S {
 
     private static void ieee754s(final float f, final String n) {
         final int i = floatToRawIntBits(f);
-        System.out.printf("%1s %2$-13e %3$s%n", ieee754s(i), intBitsToFloat(i),
+        System.out.printf("%1s %2$-+13e %3$s%n", ieee754s(i), intBitsToFloat(i),
                           ofNullable(n).orElse(""));
     }
 
@@ -52,9 +52,9 @@ public class IEEE754S {
             ieee754s(Float.MAX_VALUE, "Float.MAX_VALUE");
             ieee754s(Float.MIN_VALUE, "Float.MIN_VALUE");
             ieee754s(Float.MIN_NORMAL, "Float.MIN_NORMAL");
-            ieee754s(Float.NaN, "Float.NaN");
             ieee754s(Float.NEGATIVE_INFINITY, "Float.NEGATIVE_INFINITY");
             ieee754s(Float.POSITIVE_INFINITY, "Float.POSITIVE_INFINITY");
+            ieee754s(Float.NaN, "Float.NaN");
             return;
         }
         ieee754s(parseFloat(args[0]), null);

@@ -29,7 +29,7 @@ import static java.util.Optional.ofNullable;
  */
 public class IEEE754D {
 
-    private static String ieee754d(final long value) {
+    static String ieee754d(final long value) {
         final String s = toBinaryString(value >>> 63); // 1
         final String e = format(
                 "%11s", toBinaryString((value << 1) >>> 53)); // 11
@@ -41,7 +41,7 @@ public class IEEE754D {
 
     private static void ieee754d(final double d, final String n) {
         final long l = doubleToRawLongBits(d);
-        System.out.printf("%1s %2$-13e %3$s%n", ieee754d(l),
+        System.out.printf("%1s %2$-+13e %3$s%n", ieee754d(l),
                           longBitsToDouble(l), ofNullable(n).orElse(""));
     }
 
@@ -51,9 +51,9 @@ public class IEEE754D {
             ieee754d(Double.MAX_VALUE, "Double.MAX_VALUE");
             ieee754d(Double.MIN_VALUE, "Double.MIN_VALUE");
             ieee754d(Double.MIN_NORMAL, "Double.MIN_NORMAL");
-            ieee754d(Double.NaN, "Double.NaN");
             ieee754d(Double.NEGATIVE_INFINITY, "Double.NEGATIVE_INFINITY");
             ieee754d(Double.POSITIVE_INFINITY, "Double.POSITIVE_INFINITY");
+            ieee754d(Double.NaN, "Double.NaN");
             return;
         }
         ieee754d(parseFloat(args[0]), null);
