@@ -151,7 +151,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>pdf-book</id>
+            <id>pdf</id>
             <!--<phase>generate-resources</phase>-->
             <goals>
               <goal>process-asciidoc</goal>
