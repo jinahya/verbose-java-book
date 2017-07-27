@@ -5,12 +5,12 @@
 ----
 public class SuccinctHelloWorld {
     public static void main(final String[] args) {
-        System.out.printf("%s%n", "hello, world");
+        System.out.printf("hello, world%n");
     }
 }
 ----
 
-가능한 한 Hello World 로 첫 장을 시작하고 싶지는 않았지만 비교적 간단하고 명확한 요구사항을 바탕으로 프로젝트를 설계하고 구현하는 방법을 알아보고자 한다. 이 장에서는 인터페이스를 정의하는 방법을 알아보고 그 인터페이스를 구현하고 사용하는 방법에 대해 알아본다.
+가능한 한 Hello World 로 첫 장을 시작하고 싶지는 않았지만 비교적 간단하고 명확한 요구사항을 바탕으로 프로젝트를 설계하고 구현하는 방법을 알아보기에 더 없이 적절한 주제가 아닐 수 없다. 이 장에서는 인터페이스를 정의하는 방법을 알아보고 그 인터페이스를 구현하고 사용하는 방법에 대해 알아본다.
 
 === hello-world-api
 
@@ -43,8 +43,8 @@ public interface HelloWorld {
     int BYTES = 12;
 
     // 주어진 배열(array)의 명시된 위치(offset)부터 "hello, world"를 기록한다.
-    // array 이 null 이면 NullPointerException을 던진다.
-    // offset 이 음수이면 IndexOutOfBoundsException을 던진다.
+    // array가 null 이면 NullPointerException을 던진다.
+    // offset이 음수이면 IndexOutOfBoundsException을 던진다.
     // (offset + BYTES) 가 array.length 보다 크면 IndexOutOfBoundsException을 던진다.
     void set(byte[] array, int offset);
 }
@@ -74,13 +74,13 @@ public interface HelloWorld {
     // 버버에 충분한 공간이 없으면 BufferOverflowException 을 던진다.
     // 버퍼의 위치(position) 값이 BYTES 만큼 증가된다.
     // 주어진 버퍼(buffer)를 반환한다.
-include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/HelloWorld.java[lines=68..83]
+include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/HelloWorld.java[lines=67..83]
 ----
 <1> `buffer` 인자가 `null` 이면 `NullPointerException` 을 던진다.
 <2> `buffer` 의 공간이 충분치 않으면 `BufferOverflowException` 을 던진다.
 <3> `buffer` 가 내부적으로 배열을 사용한다면 `set(byte[], int)` 메서드에 그 배열을 직접 전달하여 값을 기록한 후 버퍼의 위치(`position`)를 임의로 `BYTES` 만큼 증가시킨 후 반환한다.
-<4> 배열을 생성하고 `set(byte[], int)` 메서드를 이용해 값을 채운다.
-<5> 채워진 배열을 버퍼에 담는다. (버퍼의 `position` 값이 배열 길이만큼 증가한다.)
+<4> (버퍼가 내부적으로 배열을 사용하고 있지 않다면) 배열을 하나 생성하고 `set(byte[], int)` 메서드를 이용해 값을 채운 후,
+<5> 배열에 채워진 값들을 버퍼로 옮긴다. (버퍼의 `position` 값이 배열 길이만큼 증가한다.)
 
 ===== write(OutputStream)
 
@@ -100,11 +100,12 @@ include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/He
 .HelloWorld.java#write(WritableByteChannel)
 ----
     // 주어진 채널에 hello, world 바이트들을 기록한 후 그 채널을 반환한다.
-include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/HelloWorld.java[lines=120..130]
+include::codes/hello-world-api/src/main/java/com/github/jinahya/verbose/hello/HelloWorld.java[lines=121..132]
 ----
 <1> `channel` 인자가 `null` 이면 `NullPointerException` 을 던진다.
 <2> 버퍼를 생성하고 `put(ByteBuffer)` 메서드를 이용해 값을 채운다.
-<3> 버퍼에 값이 남아있는 동한 `channel` 에 기록한다.
+<3> 버퍼를 읽기 상태로 전환한 후,
+<4> 버퍼에 값이 남아있는 동한 `channel` 에 기록한다.
 
 NOTE: {apidocs-javase}/api/java/nio/channels/WritableByteChannel.html[`WritableByteChannel`] 인터페이스를 구현한 클래스들 중에는 내부적인 상태 혹은 설정에 따라 http://docs.oracle.com/javase/8/docs/api/java/nio/channels/WritableByteChannel.html#write-java.nio.ByteBuffer-[`write(ByteBuffer)`] 메서드에서 버퍼 모든 바이트들을 한번에 기록하지 않을 수도 있다.
 
@@ -124,7 +125,7 @@ public class HelloWorldTest {
 [source,java]
 .HelloWorldTest.java#mock()
 ----
-include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=57..60]
+include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=57..61]
 ----
 <1> 아무런 동작도 하지 않는다.
 
@@ -139,7 +140,7 @@ include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/He
     private static class Mock implements HelloWorld {
         @Override
         public void set(final byte[] array, final int offset) {
-            // empty
+            // does nothing
         }
     }
     private HelloWorld mock() {
@@ -155,7 +156,7 @@ include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/He
         return new HelloWorld() {
             @Override
             public void set(final byte[] array, final int offset) {
-                // empty
+                // does nothing
             }
         }
     }
@@ -167,7 +168,7 @@ include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/He
 ----
     private HelloWorld mock() {
         return (byte[] a, int o) -> {
-            // empty
+            // does nothing
         };
     }
 ----
@@ -178,25 +179,25 @@ include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/He
 ----
     private HelloWorld mock() {
         return (a, o) -> {
-            // empty
+            // does nothing
         };
     }
 ----
 ====
 
-===== testPut()
+===== testPutBuffer()
 
 이제 다음과 같이 `put(ByteBuffer)` 메서드를 테스트 하자.
 
 [source,java]
-.HelloWorldTest.java#testPut()
+.HelloWorldTest.java#testPutBuffer()
 ----
-include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=65..81]
+include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=66..82]
 ----
 <1> `buffer` 값이 `null` 이면 `NullPointerException` 을 던지는지 확인한다.
-<2> `buffer` 에 충분한 공간이 없으면 `BufferOverflowException` 을 던지는지 확인한다.
-<3> `byte[]` 를 사용하는 `buffer` 를 가지고 확인한다.
-<4> `byte[]` 를 사용하지 않는 `buffer` 를 가지고 확인한다.
+<2> `HelloWorld#BYTES(12)` 보다 작은 크기의 `buffer` 를 전달했을 때  `BufferOverflowException` 을 던지는지 확인한다.
+<3> `byte[]` 를 사용하는 `buffer` 를 생성한 후 `put` 메서드를 호출한 후 전달한 버퍼를 반환하는지 확인한다.
+<4> `byte[]` 를 사용하지 않는 버퍼를 생성한 후 `put` 메서드를 호출한 후 전달한 버퍼를 반환하는지 확인한다.
 
 보는 바와 같이 `put(ByteBufer)` 메서드가 에러 없이 동작하는지를 시험했을 뿐 전달한 `buffer` 에 어떤 값이 들어갔는지는 확인하지 않는다.
 
@@ -233,26 +234,26 @@ assertThrows(NullPointerException.class, () -> mock().put(null)); // <1>
 <1> `mock().put(null)` 바로 뒤에 서술문의 끝을 나타내는 세미콜론(`;`)이 없다.
 ====
 
-===== testWriteWithStream()
+===== testWriteStream()
 
 다음은 `write(OutputStream)` 메서드를 시험하는 항목이다.
 [source,java]
-.HelloWorldTest.java#testWriteWithStream()
+.HelloWorldTest.java#testWriteStream()
 ----
-include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=88..95]
+include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=89..96]
 ----
 <1> `stream` 값이 `null` 이면 `NullPointerException` 을 던지는지 확인한다.
 <2> 유효한 `OutputStream` 값을 `write(OutputStream)` 에 전달한다.
 
 역시나 전달한 `OutputStream` 에 어떤 값이 기록되었는지 확인하지 않는다.
 
-===== testWriteWithChannel()
+===== testWriteChannel()
 
 다음은 `write(WritableByteChannel)` 메서드를 시험한다.
 [source,java]
-.HelloWorldTest.java#tstWriteWithChannel()
+.HelloWorldTest.java#testWriteChannel()
 ----
-include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=102..110]
+include::codes/hello-world-api/src/test/java/com/github/jinahya/verbose/hello/HelloWorldTest.java[lines=103..111]
 ----
 <1> `channel` 값이 `null` 이면 `NullPointerException` 을 던지는지 확인한다.
 <2> 유효한 `WritableByteChannel` 값을 전달한다.
@@ -295,7 +296,7 @@ public class HelloWorldImpl implements HelloWorld {
 .HelloWorldImplTest.java
 ----
 public class HelloWorldImplTest {
-    // @todo: create test cases for HelloWorldImpl.java
+    // @todo: add test cases for HelloWorldImpl.java
 }
 ----
 
@@ -315,11 +316,18 @@ public class HelloWorldImplTest {
 
 [source,java]
 ----
+// offset 을 검증하는 코드가 array 를 검증하는 코드보다 먼저 수행된다.
 @Override
 public void set(final byte[] array, final int offset) {
-    if (offset < 0) // IndexOutOfBoundsException
-    if (array == null) // NullPointerException
-    if (offset + HelloWorld.BYTES > array.length) // IndexOutOfBoundsException
+    if (offset < 0) {
+        // @todo: throw IndexOutOfBoundsException
+    }
+    if (array == null) {
+        // @todo: throw NullPointerException
+    }
+    if (offset + HelloWorld.BYTES > array.length) {
+        // @todo: throw IndexOutOfBoundsException
+    }
 }
 ----
 때문에 첫번째 경우(`array` 가 `null` 인 경우)을 테스트할 경우에는 두번째 조건에 위배되지 않는 `offset` 값을 사용해야 하며 두번째 경우(`offset` 이 음수인 경우)을 검증할때는 `array` 의 값으로 `null` 을 사용하면 안된다. 아래 코드는 `array` 가 `null` 인 경우와 `offset` 이 음수인 경우를 한꺼번에 시험한다.
@@ -355,7 +363,7 @@ public void do_not_ever_test_like_this() {
 ----
 include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldImplTest.java[lines=39..44]
 ----
-<1> 유효한 `offset` 값을 사용한다.
+<1> 해당 항목에 위해된지 않는 `offset` 값을 사용한다.
 
 구현 항목을 작성하기 전에 테스트를 실행해보자.
 
@@ -374,7 +382,7 @@ Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
 $
 ----
 
-실패하였다. `set(byte[], int)` 메서드에 `array` 의 값으로 `null` 을 전달했지만 `NullPointerException` 을 던지지 않았다. (사실, 아직 아무런 구현도 되어 있지 않다.) 이제 이 시험항목을 만족시키는 구현 항목을 작성하자.
+**실패하였다**. `set(byte[], int)` 메서드에 `array` 의 값으로 `null` 을 전달했지만 `NullPointerException` 을 던지지 않았다. (사실, 아직 아무런 구현도 되어 있지 않다.) 이제 이 시험항목을 만족시키는 구현 항목을 작성하자.
 
 [source,java]
 .HelloWorldImpl.java#set(byte[], int)
@@ -382,7 +390,7 @@ $
 @Override
 public void set(final byte[] array, final int offset) {
     if (array == null) {
-        throw new NullPointerException("null array");
+        throw new NullPointerException("array is null");
     }
     // @todo: implement more
 }
@@ -403,11 +411,14 @@ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
 $
 ----
 
-다음 항목은 `offset` 이 음수인 경우에 대한 시험 항목이다.
+시험 항목이 수행되고 검증되었다.
+
+이제 `offset` 이 음수인 경우에 대한 시험 항목을 작성하자.
 
 [source,java]
 .HelloWorldImplTest.java#expectIndexOutOfBoundsExceptionWhenOffsetIsNegative()
 ----
+    // offset 이 0 보다 작으면 IndexOutOfBoundsException 을 던져야 한다.
 include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldImplTest.java[lines=50..55]
 ----
 
@@ -415,6 +426,8 @@ include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/He
 
 [source,text]
 ----
+$ pwd
+/.../path/to/.../verbose-java/hello-world-lib
 $ mvn test
 ...
 Method HelloWorldImplTest.expectIndexOutOfBoundsWhenOffsetIsNegative()[...] should have thrown an exception of type class java.lang.IndexOutOfBoundsException
@@ -428,7 +441,7 @@ Tests run: 2, Failures: 1, Errors: 0, Skipped: 0
 $
 ----
 
-다음과 같이 해당 항목을 구현하고 테스트를 실행한다.
+다음과 같이 해당 항목을 구현하고 다시 테스트를 수행한다.
 
 [source,java]
 .HelloWorldImpl.java#set(byte[], int)
@@ -447,6 +460,8 @@ public void set(final byte[] array, final int offset) {
 
 [source,text]
 ----
+$ pwd
+/.../path/to/.../verbose-java/hello-world-lib
 $ mvn test
 ...
 Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
@@ -458,7 +473,7 @@ Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
 $
 ----
 
-다음은 배열 공간이 충분하지 않을 경우에 대한 시험항목이다.
+다음은 배열에 공간이 충분치 않을 경우에 대한 시험항목이다.
 
 [source,java]
 .HelloWorldImplTest.java#expectIndexOutOfBoundsExceptionWhenCapacityIsNotEnough()
@@ -577,6 +592,8 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 $
 ----
 
+**정의된 모든 항목이, 그리고 그 항목들만이, 구현되었다.**
+
 ==== HelloWorldDataProvider.java
 지금까지 우리는 `HelloWorldImpl` 클래스의 기능을 시험하기 위해 (각각의 단위 시험 항목에서) 다음과 같은 작업을 수행했다.
 
@@ -604,7 +621,7 @@ class HelloWorldDataProvider {
 [source,java]
 .HelloWorldDataProvider.java#provideArrayNull()
 ----
-include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataProvider.java[lines=34..40]
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataProvider.java[lines=36..42]
 ----
 `@org.testng.annotations.DataProvider` 어노테이션을 달아서 데이터 제공자임을 명시하였다.
 
@@ -615,7 +632,7 @@ include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/He
 [source,java]
 .HelloWorldDataProvider.java#provideOffsetNegative()
 ----
-include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataProvider.java[lines=47..54]
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataProvider.java[lines=49..56]
 ----
 
 ===== provideCapacityNotEnough()
@@ -625,11 +642,25 @@ include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/He
 [source,java]
 .HelloWorldDataProvider.java#provideCapacityNotEnough()
 ----
-include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataProvider.java[lines=61..69]
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataProvider.java[lines=63..71]
 ----
 <1> `HelloWorld.BYTES + 0` 은 불필요한 작업이다.
 
 TIP: 데이터 제공자의 반환값은 `Object[][]` 혹은 `Iterator<Object[]>` 형으로 작성해야 한다. 두 경우 모두 실제 시험 항목의 인자들(`Object[]{array, offset}`)을 1개 이상 제공하기 위한 형태이다.
+
+===== provideValid()
+
+다음은 유효한 데이터를 제공하는 메서드이다.
+
+[source,java]
+.HelloWorldDataProvider.java#provideValid()
+----
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataProvider.java[lines=78..85]
+----
+<1> `0` 부터 `15` 까지의 값을 가지는 `IntStream` 에 대하여,
+<2> 각각의 값을 `byte[]` 와 `int` 를 포함하는 `Object[]` 형으로 변환한 후,
+<3> `List` 로 모은(collect) 다음,
+<4> 그 리스트의 `Iterator` 를 반한한다.
 
 ==== HelloWorldDataTest.java
 
@@ -640,6 +671,7 @@ TIP: 데이터 제공자의 반환값은 `Object[][]` 혹은 `Iterator<Object[]>
 ----
 abstract class HelloWorldDataTest {
 
+    // 각 시험 항목들에서 사용할 HelloWorld 객체를 반환한다.
     abstract HelloWorld implementation();
 }
 ----
@@ -653,10 +685,10 @@ abstract class HelloWorldDataTest {
 [source,java]
 .HelloWorldDataTest#testArrayNull(byte[], int)
 ----
-include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=47..52]
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=48..53]
 ----
 
-`@Test` 어노테이션의 `dataProvider` 요소와 `dataProviderClass` 요소를 이용하여 데이터 제공자를 명시하였다. TestNG는 시험항목을 호출할 때 데이터 제공자가 반환하는 데이터를 시험 항목의 인자(`byte[], int`)로 전달한다.
+`@Test` 어노테이션의 `dataProvider` 요소와 `dataProviderClass` 요소를 이용하여 데이터 제공자를 명시하였다. 시험이 수행될 때 `provideArrayNull` 메서드가 반환하는 시료들(`Object[][]`) 각각이 이 메서드의 인자로 전달된다.
 
 ===== testOffsetNegative(byte[], int)
 
@@ -665,7 +697,7 @@ include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/He
 [source,java]
 .HelloWorldDataTest#testOffsetNegative(byte[], int)
 ----
-include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=65..70]
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=66..71]
 ----
 
 ===== testCapacityNotEnough(byte[], int)
@@ -675,10 +707,20 @@ include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/He
 [source,java]
 .HelloWorldDataTest#testCapacityNotEnough(byte[], int)
 ----
-include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=84..89]
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=85..90]
 ----
 
-데이터 제공자와 단위 시험 항목들이 준비되었다. 이제 `implemention()` 메서드를 구현하는 클래스들를 만들어보자.
+===== testValid(byte[], int)
+
+다음은 유효한 인자들(`array`, `offset`)을 데이터로 제공받아 수행되는 시험 항목이다.
+
+[source,java]
+.HelloWorldDataTest#testValid(byte[], int)
+----
+include::codes/hello-world-lib/src/test/java/com/github/jinahya/verbose/hello/HelloWorldDataTest.java[lines=104..121]
+----
+
+데이터 제공자와 단위 시험 항목들이 준비되었다. 이제 `implementation()` 메서드를 구현하는 클래스들를 만들어보자.
 
 [NOTE]
 ====
@@ -849,7 +891,7 @@ NOTE: 보통의 경우 주입(injection) 작업은 의존성 주입을 지원하
 [source,text]
 ----
 $ pwd
-/.../path/to/.../verbose-java/hello-world-app
+/.../path/to/.../verbose-java/hello-world-lib
 $ mvn -Dtest=HelloWorldGuiceTest test
 ...
 $
@@ -1140,4 +1182,3 @@ $ mvn -Dtest=HelloWorldServiceTest test
 ...
 $
 ----
-
