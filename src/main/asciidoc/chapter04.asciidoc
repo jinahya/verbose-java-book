@@ -26,7 +26,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 ----
 ****
 
-두 파일을 전달받아 복사하는 메서드를 다음과 같이 구현할 수 있다.
+두개의 파일을 전달받아 복사하는 메서드를 다음과 같이 구현할 수 있다.
 
 [source,java]
 .IoUtils1.java#copy(File, File)
