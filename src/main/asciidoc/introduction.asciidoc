@@ -8,12 +8,17 @@
 ----
 $ git clone git@github.com:jinahya/verbose-java.git // <1>
 ...
+
 $ cd verbose-java
+
 $ git tag
 t.a.g
 x.y.z
 ...
+
 $ git checkout x.y.z
+
+$
 ----
 <1> https://github.com/jinahya/verbose-java.git
 
@@ -24,10 +29,12 @@ $ git checkout x.y.z
 [source,text]
 ----
 $ java -version
-jjava version "1.8.0_xx"
+java version "1.8.0_xx"
 ...
+
 $ javac -version
 javac 1.8.0_xx
+
 $
 ----
 
@@ -37,8 +44,6 @@ $
 
 [source,text]
 ----
-$ pwd
-/.../path/to/.../verbose-java
 $ mvn --version
 Apache Maven x.y.z (...)
 Maven home: /.../path/to/maven/
@@ -46,7 +51,12 @@ Java version: 1.8.0_xx, vendor: ...
 Java home: ...
 Default locale: ...
 OS name: ...
+
+$ pwd
+/.../path/to/.../verbose-java
+
 $ mvn clean install
 ...
+
 $
 ----

@@ -8,7 +8,7 @@ include::cover.asciidoc[]
 
 :rfc-4648: http://tools.ietf.org/html/rfc4648
 
-:version-testng: 6.9.10
+:version-testng: 6.11
 :apidocs-testng: http://static.javadoc.io/org.testng/testng/{version-testng}
 
 :project-commons-codec: https://commons.apache.org/proper/commons-codec/
@@ -16,11 +16,11 @@ include::cover.asciidoc[]
 :apidocs-commons-codec: http://static.javadoc.io/commons-codec/commons-codec/{version-commons-codec}
 
 :project-commons-lang3: https://commons.apache.org/proper/commons-lang/
-:version-commons-lang3: 3.4
+:version-commons-lang3: 3.6
 :apidocs-commons-lang3: http://static.javadoc.io/org.apache.commons/commons-lang3/{version-commons-lang3}
 
 :project-guava: https://github.com/google/guava
-:version-guava: 19.0
+:version-guava: 22.0
 :apidocs-guava: http://static.javadoc.io/com.google.guava/guava/{version-guava}
 
 include::foreword.asciidoc[]

@@ -70,8 +70,8 @@ public interface HelloWorld {
 
 [source,text]
 ----
-       0     offset                  offset + 12     array.length - 1
-            ↙                       ↙               ↙
+index  0   offset                  offset + 12     array.length - 1
+       |   |                       |               |
        - - - - - - - - - - - - - - - - - - - - - - -
 array      h e l l o ,   w o r l d
        - - - - - - - - - - - - - - - - - - - - - - -
@@ -80,6 +80,8 @@ array      h e l l o ,   w o r l d
 `HelloWorld` 인터페이스에는 위에 정의된 필드와 메서드 외에 몇 개의 `default` 메서드들이 정의되어 있다.
 
 ===== write(OutputStream)
+
+주어진 `OutputStream` 에 `hello, world` 바이트들을 기록한 후 그 스트림을 반환한다.
 
 [source,java]
 .HelloWorld.java#write(OutputStream)
