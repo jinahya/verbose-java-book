@@ -20,6 +20,6 @@ import javax.ejb.Stateless;
 @Stateless
 public interface TemperatureService {
 
-    // 현재 온도를 저장한다.
+    // 해당 온도계의 수치값을 저장한다.
     void persistTemperature(FahrenheitThermometer thermometer);
 }

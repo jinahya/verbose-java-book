@@ -20,7 +20,7 @@ $ git checkout x.y.z
 
 $
 ----
-<1> https://github.com/jinahya/verbose-java.git
+<1> GitHub 에 공개키를 등록하지 않았다면 https://github.com/jinahya/verbose-java.git 로 사용할 수 있다.
 
 === Java SE 8
 
