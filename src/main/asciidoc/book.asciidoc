@@ -15,12 +15,16 @@ include::cover.asciidoc[]
 :version-commons-codec: 1.10
 :apidocs-commons-codec: http://static.javadoc.io/commons-codec/commons-codec/{version-commons-codec}
 
+:project-commons-io: https://commons.apache.org/proper/commons-io/
+:version-commons-io: 2.5
+:apidocs-commons-io: https://static.javadoc.io/commons-io/commons-io/{version-commons-io}
+
 :project-commons-lang3: https://commons.apache.org/proper/commons-lang/
 :version-commons-lang3: 3.6
 :apidocs-commons-lang3: http://static.javadoc.io/org.apache.commons/commons-lang3/{version-commons-lang3}
 
 :project-guava: https://github.com/google/guava
-:version-guava: 22.0
+:version-guava: 23.0
 :apidocs-guava: http://static.javadoc.io/com.google.guava/guava/{version-guava}
 
 include::foreword.asciidoc[]

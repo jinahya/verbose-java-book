@@ -23,7 +23,7 @@ ________________________________________________________________________________
 - 자바 프로그래밍 언어에는 두가지 데이터 형이 있다. 하나는 원시형(primitive types)이고 또 다른 하나는 참조형(reference types)이다.
 - 원시형(primitive types)에는 `boolean` 과 수치형(numeric types)이 있다.
 - 수치형(numeric types)에는 정수형(integral types)과 부동소수점형(floating-point types)이 있다.
-- 정수형(integral types)에는 `byte`, `short`, `int`, `long`, 그리고 `char` 가 이다.
+- 정수형(integral types)에는 `byte`, `short`, `int`, `long`, 그리고 `char` 가 있다.
 - 부동소수점형(floating-point types)에는 `float` 과 `double` 이 있다.
 
 [frame="topbot",options="header"]
@@ -71,7 +71,9 @@ MIN  -4  100  ⤦
 최대값은 첫번째 비트가 `0` 이고 나머지 모든 비트가 `1` 인 값이고 최소값은 첫번째 비트가 `1` 이고 나머지 비트가 모두 `0` 인 값이다. 이를 수식으로 표현하면 최대값은 `+2^n-1^ - 1` 이고 최소값은 `-2^n-1^` 이다.
 
 ****
-크기가 1 비트이고 부호를 가지며 2의 보수 체계를 사용하는 정수형으로 표현할 수 있는 최대값과 최소값은 무엇인가?
+크기가 1 비트이고 부호를 가지며 2의 보수 체계를 사용하는 정수형으로 표현할 수 있는 최대값과 최소값은 무엇인가? +
+`Minimum`:  +
+`Maximum`:
 ****
 
 === IEEE 754 floating-point numbers
@@ -264,12 +266,12 @@ floatToRawIntBits: 0xff9be37c
 
 === hex-codec-api
 
-(거의 모든) 컴퓨터들은 자료를 저장할 때, `octet` 으로 불리는, 여덟개의 비트로 구성된 최소 단위의 숫자들로 나누어 저장한다. `a` 라는 문자는 (`US-ASCII` 로 인코딩 되었을 때) `01100001` 로 자장되고 `홍` 이라는 문자는 (`UTF-8` 로 인코딩 되었을 때) `111011011 00110011 0001101` 로 저장된다. 아래 표에 여덟개의 비트로 표현할 수 있는 몇몇 값들을 10진법, 8진법, 2진법, 그리고 자바의 `byte` 값으로 표현하였다.
+(거의 모든) 컴퓨터들은 자료를 저장할 때, `octet` 으로 불리는, 여덟개의 비트로 구성된 최소 단위의 숫자들로 나누어 저장한다. `a` 라는 문자는 (`US-ASCII` 로 인코딩 되었을 때) `01100001` 로 저장되고 `홍` 이라는 문자는 (`UTF-8` 로 인코딩 되었을 때) `111011011 00110011 0001101` 로 저장된다. 아래 표에 여덟개의 비트로 표현할 수 있는 몇몇 값들을 10진법, 8진법, 2진법, 그리고 자바의 `byte` 값으로 표현하였다.
 
 [cols=">1,>1,>1,>1,<2",frame="topbot",options="header"]
 .some 8-bit values
 |====
-|base10|base8|base2     |`byte`|notes
+|base10|base8|base2     |byte  |notes
 |   `0`|  `0`|       `0`|   `0`|
 |  `15`| `17`|    `1111`|  `15`|
 |  `31`| `37`|   `11111`|  `31`|
@@ -300,9 +302,9 @@ Byte.MIN_VALUE  -128  10000000  ⤦
 
 [source,text]
 ----
-index  7 6 5 4 3 2 1 0
-upper  H H H H
-lower          L L L L
+index  7 6 5 4 3 2 1 0    -> 0 ~ 255
+upper  H H H H            -> 0 ~ 15
+lower          L L L L    -> 0 ~ 15
 ----
 
 그리고 (네 개의 비트로 구성되는) 각 그룹의 값(`0` ~ `15`)을 아래 표에 정의된 열 여섯개의 문자들 중 하나로 변환한다. (한 개의 숫자가 두개의 문자로 변환된다.)
@@ -335,7 +337,7 @@ NOTE: `10` 부터 `15` 까지의 숫자를 소문자(`'a'` 부터 `'f'` 까지)�
 
 [source,text]
 ----
-    0                    7                      15                      23
+    0                    7          11          15                      23
     h  e  l  l  o  , SP  w  o  r  l  d
    -- -- -- -- -- -- -- -- -- -- -- --
 0x 68 65 6C 6C 6F 2C 20 77 6F 72 6C 64
@@ -452,6 +454,8 @@ public interface HexDecoder {
 
 ===== decode(ByteBuffer, ByteBuffer)
 
+두 개의 버퍼를 전달받아 첫번째 버퍼의 문자들을 디코드한 후 두번째 버버에 담는다.
+
 [source,java]
 .HexDecoder.java#decode(ByteBuffer, ByteBuffer)
 ----
@@ -463,6 +467,8 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexDec
 <2> `decodeOctet(ByteBuffer)` 메서드에 `encoded` 버퍼를 전달하고 반환된 값을 `decoded` 버퍼에 담는다.
 
 ===== decode(ByteBuffer)
+
+전달받은 버퍼의 문자를을 디코드한 후 그 결과를 새로운 버퍼에 담에서 반환한다.
 
 [source,java]
 .HexDecoder.java#decode(ByteBuffer)
@@ -490,7 +496,7 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexDec
 
 ==== HexOutputStream.java
 
-기록되는 각각의 바이트들을 자동으로 (두 개의) `base16` 문자들로 바꾸어 기록하는 `OutputStream` 이다. {apidocs-javase}/java/io/FilterOutputStream.html[`java.io.FilterInputStream`] 클래스를 확장하여 작성되었다.
+기록되는 각각의 바이트들 각각을 자동으로 (두 개의) `base16` 문자들로 바꾸어 기록하는 `OutputStream` 이다. {apidocs-javase}/java/io/FilterOutputStream.html[`java.io.FilterInputStream`] 클래스를 확장하여 작성되었다.
 
 [source,java]
 .HexOutputStream.java
@@ -789,42 +795,39 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexInp
 
 ==== FilterChannel.java
 
-이제 `HexOutputStream` 클래스와 `HexInputStream` 클래스가 수행하는 기능을 `java.nio.channels` 패키지에 정의된 클래스들을 사용하여 구현해 보자. `FilterOutputStream` 과 `FilterInputStream` 에 해당하는 클래스들이 존재하지 않으므로 `WritableByteChannel` 인터페이스와 `ReadableByteChanel` 인터페이스의 공통 부모인 `java.nio.channels.Channel` 인터페이스를 구현하는 클래스를 하나 정의하고 공통의 기능을 미리 구현하도록 하겠다.
+이제 `HexOutputStream` 클래스와 `HexInputStream` 클래스가 수행하는 기능을 `java.nio.channels` 패키지에 정의된 클래스들을 사용하여 구현해 보자. `FilterOutputStream` 과 `FilterInputStream` 에 해당하는 클래스들이 존재하지 않으므로 `WritableByteChannel` 인터페이스와 `ReadableByteChanel` 인터페이스의 공통 부모인 `java.nio.channels.Channel` 인터페이스를 구현하는 클래스를 하나 정의하고 공통의 기능을 미리 구현하도록 하겠다. `Filter(Input|Output)Stream` 과는 다르게 `Supplier` 를 이용한다.
 
 [source,java]
 .FilterChannel.java
 ----
-public class FilterChannel<T extends Channel> implements Channel {
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/FilterChannel.java[lines=30..30]
 
-    // channel : 실제 데이터가 기록되거나 읽혀질 채널
-    public FilterChannel(final T channel) {
-        super();
-        this.channel = channel;
-    }
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/FilterChannel.java[lines=37..41]
 
-    protected T channel;
-}
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/FilterChannel.java[lines=87..92]
 ----
+<1> 생성자를 통해 전달받은 `Supplier<T>`.
+<2> `isOpen` 메서드를 구현하기 위한 변수.
+<3> `channelSupplier` 를 통해 (게으르게) 제공된 채널.
 
-===== Channel#isOpen()
+===== isOpen()
 
-채널이 열려 있는지 확인한다. `HexChannel#isOpen()` 메서드는 `channel` 의 `isOpen()` 을 호출하도록 구현되었다.
+채널이 열려 있는지 확인한다. `FilterChannel#isOpen()` 메서드는 `closed` 변수의 값이 `false` 인지를 반환한다.
 
 [source,java]
 .FilterChannel.java#isOpen()
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/FilterChannel.java[lines=45..48]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/FilterChannel.java[lines=50..53]
 ----
-<1> `channel` 이 `null` 이면 `NullPointerException` 이 발생한다.
 
-===== Channel#close();
+===== close();
 
-채널을 닫는다. `FilterChannel#close()` 메서드는 `channel` 이 `null` 이 아닐 경우에 한해 `channel` 에 직접 호출하도록 구현되었다.
+채널을 닫는다. `FilterChannel#close()` 메서드는 `channel` 이 `null` 이 아닐 경우 `channel` 의 `close()` 메서드를 호출하고 `closed` 필드의 값을 `true` 로 변환한다.
 
 [source,java]
 .FilterChannel.java#close()
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/FilterChannel.java[lines=57..62]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/FilterChannel.java[lines=62..69]
 ----
 
 ==== WritableFilterChannel.java
@@ -834,40 +837,11 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/Filter
 [source,java]
 .WritableFilterChannel.java
 ----
-public class WritableFilterChannel
-        extends FilterChannel<WritableFilterChannel>
-        implements WritableByteChannel {
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableFilterChannel.java[lines=28..30]
 
-    public WritableFilterChannel(final WritableByteChannel channel) {
-        super(channel);
-    }
-}
-----
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableFilterChannel.java[lines=37..39]
 
-[NOTE]
-====
-아래와 같이 `WritableByteChannel` 을 확장하는 특정 형태의 클래스들을 위한 구현도 가능하다.
-[source,java]
-.WritableFilterChannel.java
-----
-public class TypedWritableFilterChannel<T extends WritableByteChannel>
-        extends FilterChannel<T>
-        implements WritableByteChannel {
-
-    public WritableFilterChannel(final T channel) {
-        super(channel);
-    }
-}
-----
-====
-
-===== WritableByteChannel#write(ByteBuffer)
-
-아래와 같이 `channel` 필드에 직접 호출하도록 구현되었다.
-
-[source,java]
-----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableFilterChannel.java[lines=48..51]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableFilterChannel.java[lines=49..53]
 ----
 
 ==== ReadableFilterChannel.java
@@ -877,23 +851,11 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/Writab
 [source,java]
 .ReadableFilterChannel.java
 ----
-public class ReadableFilterChannel
-        extends FilterChannel<ReadableByteChannel>
-        implements ReadableByteChannel {
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableFilterChannel.java[lines=28..30]
 
-    public ReadableFilterChannel(final ReadableByteChannel channel) {
-        super(channel);
-    }
-}
-----
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableFilterChannel.java[lines=37..39]
 
-===== ReadableByteChannel#read(ByteBuffer)
-
-아래와 같이 `channel` 필드에 직접 호출하도록 구현되었다.
-
-[source,java]
-----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableFilterChannel.java[lines=48..51]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableFilterChannel.java[lines=49..53]
 ----
 
 ==== WritableHexChannel.java
@@ -903,19 +865,15 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/Readab
 [source,java]
 .WritableHexChannel.java
 ----
-public class WritableHexChannel extends WritableFilterChannel {
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableHexChannel.java[lines=33..34]
 
-    // channel: 변환된 문자들을 기록할 채널
-    // encoder: 숫자를 문자로 변활할 때 사용할 인코더
-    public WritableHexChannel(final WritableByteChannel channel,
-                              final HexEncoder encoder) {
-        super(channel);
-        this.encoder = encoder;
-    }
+    // 인코더 객체도 Supplier 를 통해 게으르게 생성한다.
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableHexChannel.java[lines=43..47]
 
-    // 숫자들을 문자들로 변환하기 위해 사용할 인코더
-    protected HexEncoder encoder;
-}
+    // 게으르게 생성된 encoder 를 반환한다.
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableHexChannel.java[lines=54..59]
+
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableHexChannel.java[lines=77..87]
 ----
 
 ===== write(ByteBuffer)
@@ -925,7 +883,7 @@ public class WritableHexChannel extends WritableFilterChannel {
 [source,java]
 .WritableHexChannel.java#write(ByteBuffer)
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableHexChannel.java[lines=50..58]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/WritableHexChannel.java[lines=68..76]
 ----
 <1> `src` 에 남아 있는 바이트 개수의 두배의 용량을 가지는 버퍼를 생성한다.
 <2> `HexEncoder` 인터페이스의 `encode(ByteBuffer, ByteBuffer)` 메서드를 이용하여 변환한다.
@@ -938,18 +896,15 @@ include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/Writab
 [source,java]
 .ReadableHexChannel.java
 ----
-public class ReadableHexChannel extends ReadableHexChannel {
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableHexChannel.java[lines=33..34]
 
-    // 변환된 문자들을 읽을 채널
-    // 문자들을 숫자들로 변환하기 위한 디코더
-    public ReadableHexChannel(final ReadableByteChannel channel,
-                              final HexDecoder decoder) {
-        super(channel);
-        this.decoder = decoder;
-    }
+    // 인코더 객체도 Supplier 를 통해 게으르게 생성한다.
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableHexChannel.java[lines=45..50]
 
-    protected HexDecoder decoder;
-}
+    // 게으르게 생성된 encoder 를 반환한다.
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableHexChannel.java[lines=57..62]
+
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableHexChannel.java[lines=92..102]
 ----
 
 ===== ReadableHexChannel#read(ByteBuffer)
@@ -959,7 +914,7 @@ public class ReadableHexChannel extends ReadableHexChannel {
 [source,java]
 .ReadableHexChannel.java#read(ByteBuffer)
 ----
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableHexChannel.java[lines=53..69]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/ReadableHexChannel.java[lines=75..91]
 ----
 <1> `dst` 에 담을 수 있는 개수의 두 배만큼의 용량을 가지는 버퍼를 생성한다.
 <2> `channel` 로부터 바이트들을 읽는다. 스트림의 끝(`end-of-stream`)에 도달했으면 `-1` 을 반환한다.
@@ -981,6 +936,7 @@ default void encode(final byte[] inarr, final int inoff, final int inlen,
     // outarr 의 outoff 부터 최소한 몇 개의 배열공간이 필요할까?
 }
 ----
+
 . `HexDcoder.java` 에 배열을 이용하는 메서드를 구현하라.
 +
 [source,java]
@@ -994,6 +950,29 @@ default void decode(final byte[] inarr, final int inoff, final int inlen,
     // outarr 의 outoff 부터 최소한 몇 개의 배열공간이 필요할까?
 }
 ----
+
+. `WritbleHexChannel` 클래스의 `write(ByteBuffer)` 메서드는 매번 변환작업에 필요한 중간 단계의 버퍼(`aux`) 를 생성한다. 해당 버퍼를 개체 변수로 변경하라.
++
+[source,java]
+.WriableHexChannel.java
+----
+    @Override
+    public int write(final ByteBuffer src) throws IOException {
+        if (aux == null) {
+            aux = allocate(src.capacity() << 1);
+        }
+        final int count = encoder().encode(src, aux); (2)
+        for (aux.flip(); aux.hasRemaining();) { (3)
+            super.write(aux);
+        }
+        aux.clear();
+        return count;
+    }
+
+    private ByteBuffer aux;
+----
+
+. `ReadableHexChannel.java` 에 대하여 위 항목에 해당하는 내용을 수행하라.
 
 === hex-codec-lib
 
@@ -1028,7 +1007,7 @@ include::codes/hex-codec-lib/src/main/java/com/github/jinahya/verbose/hex/HexEnc
 전달된 `decoded` 의 값이 `0` 부터 `15` 까지의 값이라 가정한 코드이다. `encodedNibble(int)` 메서드가 `private` 메서드이고 `HexEncoderImpl` 클래스에서만 사용된다는 점을 감안하더라도 좋은 코드라 할 수 없다. 다음과 같이 수정하면 더 좋은 코드가 아닐까 한다.
 [source,java]
 ----
-        switch (decoded & 15) { // 하위 네 개의 비트만 사용한다.
+        switch (decoded & 0b1111) { // 하위 네 개의 비트만을 기준으로 동작한다.
             // ...
         }
 ----
@@ -1081,7 +1060,7 @@ include::codes/hex-codec-lib/src/main/java/com/github/jinahya/verbose/hex/HexDec
 <2> 대문자 `'A'`(`65`)부터 `'F'`(`70`) 까지의 값이면 그 값에서 `55` 를 뺀 값을 반환한다.
 <3> 소문자 `'a'`(`97`) 부터 `'f'`(`102`) 까지의 값이라고 가정하고 그 값에서 `87` 를 뺀 값을 반환한다.
 
-앞서 `HexEncoderImpl` 클래스는 무조건 대문자로 변환했지만 여기서는 소문자로 변환된 값들도 모두 처리한다.
+NOTE: 앞서 `HexEncoderImpl` 클래스는 무조건 대문자로 변환했지만 여기서는 소문자로 변환된 값들도 모두 처리한다.
 
 [CAUTION]
 ====
@@ -1110,7 +1089,7 @@ include::codes/hex-codec-lib/src/main/java/com/github/jinahya/verbose/hex/HexDec
 ----
 include::codes/hex-codec-lib/src/main/java/com/github/jinahya/verbose/hex/HexDecoderImpl.java[lines=44..52]
 ----
-첫 번째 문자를 디코드하고 윈쪽으로 `4` 만큼 옮긴 값에 두번째 문자를 디코드한 값을 OR 연산하여 반환한다.
+<1> 첫 번째 문자를 디코드하고 윈쪽으로 `4` 만큼 옮긴 값에 두번째 문자를 디코드한 값을 OR 연산하여 반환한다.
 
 [TIP]
 ====
@@ -1131,7 +1110,15 @@ return decodeNibble(decoded.get()) << 4 | decodeNibble(decoded.get());
 [source,java]
 .Rfc4648TestVectors.java#BASE16
 ----
+final class Rfc4648TestVectors {
+
+    // ...
+
 include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/Rfc4648TestVectors.java[lines=62..70]
+
+    // ...
+
+}
 ----
 `BASE16` 필드를 직접 노출하지 않고 다음과 같이 메서드를 하나 추가하여 데이터를 사용할 수 있게 했다.
 [source,java]
@@ -1162,13 +1149,44 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/Rfc464
 [source,java]
 .HexEncoderImplTest.java#encodeVerboseCompareRfc4648()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=37..42]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=43..48]
 ----
 <1> 테스트 벡터에 정의된 값(`d`, 인코드할 값)을 변환한 후 제시된 값(`e`, 인코드된 결과값)과 비교한다.
 
+===== encodeVerboseEncodeCommons()
+
+`HexEncoderImpl` 클래스의 결과값을 {apidocs-commons-codec}/org/apache/commons/codec/binary/Hex.html#encode(byte%5B%5D)[`encode([B)[B`] 메서드의 결과값과 비교한다.
+
+[ditaa]
+....
+              +-----+
+  created --> |{io} |
+              | Hex |        --> encoded1
+              |cGRE |               |
+              +-----+               v
+
+                                 compare
+
+              +------------+        ^
+          --> |{io}        |        |
+              | HexEncoder | --> encoded2
+              |cBLU        |
+              +------------+
+....
+
+[source,java]
+.HexEncoderImpl.java#encodeVerboseEncodeCommons()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=54..72]
+----
+<1> 무작위의 데이터를 생성한다.
+<2> `Hex` 클래스의 `encode([B)[B` 메서드를 이용하여 변환한다. (해당 메서드는 `10 ~ 15` 의 값을 소문자로 변환하므로 적절한 사후 처리 작업을 추가하였다.)
+<3> `HexEncoderImpl` 클래스를 이용하여 변환한다.
+<4> 변환된 두 값을 비교한다 .
+
 ===== encodeVerboseDecodeCommons()
 
-아래는 `Hex` 클래스를 이용하여 `HexEncoderImpl` 클래스의 기능을 확인하는 시험항목이다.
+아래는 `HexEncoderImpl` 클래스를 이용하여 인코드한 값을 `Hex` 클래스를 이용하여 디코드한 후 결과값을 비교한다.
 
 [ditaa]
 ....
@@ -1185,16 +1203,45 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEnc
 [source,java]
 .HexEncoderImplTest.java#encodeVerboseDecodeCommons()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=49..57]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=79..87]
 ----
 <1> 인코드할 배열을 생성한다.
 <2> 두배의 크기를 가지는 배열을 생성한 후 `encode(ByteBuffer, ByteBuffer)` 메서드를 이용하여 인코드한다.
 <3> 인코드된 결과를 {apidocs-commons-codec}/org/apache/commons/codec/binary/Hex.html#decode(byte%5B%5D)[`Hex#decode(byte[\])`] 메서드를 이용하여 디코드한다.
 <4> 처음 생성한 배열과 디코드한 결과를 비교한다.
 
+===== encodeVerboseEncodeGuava()
+
+`HexEncoderImpl` 클래스의 결과값을 {apidocs-guava}/com/google/common/io/BaseEncoding.html#encode(byte%5D%5B)[`encode([B)Ljava.lang.String;`] 메서드의 결과값과 비교한다.
+
+[ditaa]
+....
+              +--------------+
+  created --> |{io}          |
+              | BaseEncoding | --> encoded1
+              |cGRE          |        |
+              +--------------+        |
+                                   compare
+              +--------------+        |
+          --> |{io}          |        |
+              | HexEncoder   | --> encoded2
+              |cBLU          |
+              +--------------+
+....
+
+[source,java]
+.HexEncoderImpl.java#encodeVerboseEncodeGuava()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=92..109]
+----
+<1> 무작위의 데이터를 생성한다.
+<2> `BaseEncoding` 클래스의 `encode([B)Ljava.lang.String;` 메서드를 이용하여 변환한다. (해당 메서드는 `String` 형을 반환하므로 적절한 사후 처리 작업을 추가하였다.)
+<3> `HexEncoderImpl` 클래스를 이용하여 변환한다.
+<4> 변환된 두 값을 비교한다 .
+
 ===== encodeVerboseDecodeGuava()
 
-아래는 `BaseEncoding` 클래스를 이용하여 `HexEncoderImpl` 클래스의 기능을 확인하는 시험항목이다.
+`HexEncoderImpl` 클래스로 인코드한 후 `BaseEncoding` 클래스로 디코드한 후 결과값을 비교한다.
 
 [ditaa]
 ....
@@ -1211,13 +1258,24 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEnc
 [source,java]
 .HexEncoderImplTest.java#encodeVerboseDecodeGuava()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=62..71]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEncoderImplTest.java[lines=114..131]
 ----
-<1> 인코드한 값을 {apidocs-guava}/com/google/common/io/BaseEncoding.html#decode(java.lang.CharSequence)[`BaseEncoding.decode(CharSequence)`] 메서드를 이용하여 디코드한다.
+<1> 무작위의 데이터를 생성한다.
+<2> 생성된 데이터를 `HexEncoderImpl` 클래스를 이용하여 인코드한다.
+<3> 인코드된 값을 `BaseEncoding` 클래스를 이용하여 디코드한다.
+<4> 디코드된 값을 생성한 값과 비교한다.
 
 ==== HexDecoderImplTest.java
 
 `HexDecoderImpl` 클래스의 기능을 확인하기 위한 시험클래스이다.
+
+[source,java]
+.HexDecoderImplTest.java
+----
+public class HexDecoderImplTest {
+    // @todo: add test cases.
+}
+----
 
 ===== decodeVerboseCompareRfc4648()
 
@@ -1226,7 +1284,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexEnc
 [source,java]
 .HexDecoderImplTest.java#decodeVerboseCompareRfc4648()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDecoderImplTest.java[lines=36..41]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDecoderImplTest.java[lines=41..46]
 ----
 <1> 테스트 벡터에 정의된 값(`e`, 인코드된 값)을 디코딩한 후 제시된 값(`d`, 디코딩된 값)과 비교한다.
 
@@ -1249,16 +1307,16 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDec
 [source,java]
 .HexDecoderImplTest.java#encodeCommonsDecodeVerbose()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDecoderImplTest.java[lines=46..54]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDecoderImplTest.java[lines=51..68]
 ----
-<1> 입력 배열을 생성한다.
-<2> 생성한 배열을 {apidocs-commons-codec}/org/apache/commons/codec/binary/Hex.html#encode(byte%5B%5D)[`Hex#encode(byte[\])`] 메서드를 이용해 인코드한다.
-<3> 절반 크기의 출력 배열을 생성한 후 `decode(ByteBuffer, ByteBuffer)` 메서드를 이용해 디코드한다.
-<4> 입력 배열과 출력 배열을 비교한다.
+<1> 무작위의 데이터를 생성한다.
+<2> 생성된 데이터럴 `Hex` 클래스를 이용하여 인코드한다.
+<3> 인코드된 데이터를 `HexDecoderImpl` 클래스를 이용하여 디코드한다.
+<4> 디코드된 데이터를 생성된 디에터와 비교한다.
 
 ===== encodeGuavaDecodeVerbose()
 
-다음 메서드는 `BaseEncoding` 클래스를 이용하여 `HexDecoderImpl` 클래스의 기능을 확인한다.
+`BaseEncoding` 클래스를 이용하여 `HexDecoderImpl` 클래스의 기능을 확인한다.
 
 [ditaa, "encodeGuavaDecodeVerbose"]
 ....
@@ -1275,42 +1333,114 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDec
 [source,java]
 .HexDecoderImplTest.java#encodeGuavaDecodeVerbose()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDecoderImplTest.java[lines=59..68]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexDecoderImplTest.java[lines=73..90]
 ----
-<1> 입력 배열을 {apidocs-guava}/com/google/common/io/BaseEncoding.html#decode(java.lang.CharSequence)[`BaseEncoding#decode(CharSequence)`] 메서드를 이용해 디코드한다.
+<1> 무작위의 데이터를 생성한다.
+<2> 생성된 데이터럴 `BaseEncoding` 클래스를 이용하여 인코드한다.
+<3> 인코드된 데이터를 `HexDecoderImpl` 클래스를 이용하여 디코드한다.
+<4> 디코드된 데이터를 생성된 디에터와 비교한다.
 
 ==== HexStreamTest.java
 
 `HexIputStream` 클래스와 `HexOutputStream` 클래스를 시험하기 위한 클래스이다.
 
-[ditaa, "encodeDecodeFile"]
+[source,java]
+.HexStreamTest.java
+----
+public class HexStreamTest {
+    // @todo: add testcases.
+}
+----
+
+===== encodeDecodeStream()
+
+무작위로 값을 생성한 후 `HexInputStream` 과 `HexOutputStream` 클래스를 이용하여 인코드/디코드 한 후 값을 비교한다.
+
+[ditaa]
 ....
-                +----------------------------------+
-  created ----> |{io}                              |
-                |FileInputStream -> HexOutputStream|
-     ^          |cBLU                              | -----\
-     |          +----------------------------------+      |
+                +---------------+
+  created ----> |{io}           |
+                |HexOutputStream|
+     ^          |cBLU           | -----\
+     |          +---------------+      |
 
- (compare)                                             encoded
+ (compare)                           encoded
 
-     |          +----------------------------------+      |
-     v          |{io}                              | <----/
-                |FileOutputStream <- HexInputStream|
-  decoded <---- |cGRE                              |
-                +----------------------------------+
+     |          +---------------+      |
+     v          |{io}           | <----/
+                |HexInputStream |
+  decoded <---- |cGRE           |
+                +---------------+
+....
+
+[source,java]
+.HexStreamTest.java#encodedDecodeStream()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=38..39]
+        // @todo: implement.
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=69..69]
+----
+
+무작위의 데이터를 생성한다.
+
+[source,java]
+.HexStreamTest.java#encodedDecodeStream()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=40..44]
+----
+
+생성된 데이터를 `HexOutputStream` 클래스를 이용하여 인코드한다.
+
+[source,java]
+.HexStreamTest.java#encodedDecodeStream()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=45..56]
+----
+
+인코드된 데이터를 `HexInputStream` 클래스을 이용하여 디코드한다.
+
+[source,java]
+.HexStreamTest.java#encodedDecodeStream()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=57..67]
+----
+
+디코드된 값을 최초에 생성한 데이터와 비교한다.
+
+[source,java]
+.HexStreamTest.java#encodedDecodeStream()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=68..68]
+----
+
+===== encodeDecodeFile()
+
+무작위로 생성된 데이터를 가지는 파일을 생성한 후 변환과정을 거친 값과 비교한다.
+
+[ditaa]
+....
+                +-----------------------------------------+
+  created ----> |{io}                                     |
+                |FileInputStream -(copy)-> HexOutputStream|
+     ^          |cBLU                                     | -----\
+     |          +-----------------------------------------+      |
+
+ (compare)                                                    encoded
+
+     |          +-----------------------------------------+      |
+     v          |{io}                                     | <----/
+                |FileOutputStream <-(copy)- HexInputStream|
+  decoded <---- |cGRE                                     |
+                +-----------------------------------------+
 ....
 
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-public class HexStreamTest {
-
     @Test
-    public void encodeDecodeFile()
-            throws IOException, NoSuchAlgorithmException {
-        // @todo: implement
+    public void encodedDecodeFile() {
+        // @todo: implement.
     }
-}
 ----
 
 파일(`created`)을 하나 생성하고 무작위로 내용을 채운다.
@@ -1318,24 +1448,23 @@ public class HexStreamTest {
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=28..35]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=80..90]
 ----
-<1> VM 이 종료될 때 파일을 삭제한다.
 
 파일(`encoded`)을 하나 더 만들고 `HexOutputStream` 클래스를 이용하여 복사한다. (인코드한다.)
 
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=36..45]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=91..103]
 ----
 
-또 다른 파일(`decoded`)에 `HexInputStream` 클래스를 이용하여 복사한다. (디코드한다.)
+인코드된 파일을 또 다른 파일(`decoded`)에 `HexInputStream` 클래스를 이용하여 복사한다. (디코드한다.)
 
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=46..55]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=104..116]
 ----
 
 세 개의 파일들은 각각의 크기가 다음의 조건을 만족한다.
@@ -1343,7 +1472,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStr
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=56..57]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=117..118]
 ----
 
 처음 생성한 파일(`created`)과 마지막의 디코드된 파일(`decoded`)의 내용을 비교한다.
@@ -1351,12 +1480,81 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStr
 [source,java]
 .HexStreamTest.java#encodeDecodeFile()
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=58..62]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStreamTest.java[lines=119..124]
 ----
 
 ==== HexChannelTest.java
 
-[ditaa, "encodeDecodePath"]
+`WritableHexChannel` 클래스와 `ReadableHexChannel` 클래스를 이용하여 `HexEncoderImpl` 클래스와 `HexDecoderImpl` 클래스의 기능을 확인하는 클래스이다.
+
+[source,java]
+.HexChannelTest.java
+----
+public class HexChannelTest {
+    // @todo: add test cases.
+}
+----
+
+===== encodeDecodeChannel()
+
+무작위 데이터를 생성한 후 (`HexEncoderImpl` 개체를 사용하는) `WritableHexChannel` 개체를 이용하여 인코드한 후 (`HexDecoderImpl` 개체를 사용하는) `ReadableHexChannel` 개체를 이용하여, 다시, 디코드한 값을 비교한다.
+
+[ditaa, "HexChannelTest_encodeDecodeChannel"]
+....
+                +------------------+
+  created ----> |{io}              |
+                |WritableHexChannel|
+     ^          |cBLU              | -----\
+     |          +------------------+      |
+
+ (compare)                             encoded
+
+     |          +------------------+      |
+     v          |{io}              | <----/
+                |ReadableHexChannel|
+  decoded <---- |cGRE              |
+                +------------------+
+....
+
+기본적으로 `HexStreamTest#encodeDecodeStream()` 메서드와 동일한 접근방식을 취한다.
+
+무작위로 데이터를 생성한다.
+
+[source,java]
+.HexChannelTest.java#encodeDecodeChannel()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=61..64]
+----
+
+`HexEncoderImpl` 클래스와 `WritableHexChannel` 클래스를 이용하여 인코드한다.
+
+[source,java]
+.HexChannelTest.java#encodeDecodeChannel()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=65..77]
+----
+
+`HexDecoderImpl` 클래스와 `ReadableHexChannel` 클래스를 이용하여 디코드한다.
+
+[source,java]
+.HexChannelTest.java#encodeDecodeChannel()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=78..90]
+----
+
+최초 생성한 값과 변환작업을 거친 값을 비교한다.
+
+[source,java]
+.HexChannelTest.java#encodeDecodeChannel()
+----
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=91..91]
+----
+
+===== encodeDecodePath(String)
+
+`java.nio.file.Path` 클래스를 이용하여 `HexEncoderImpl` 클래스와 `HexDecoderImpl` 클래스의 기능을 확인하는 메서드이다.
+
+[ditaa, "HexChannelTest_encodeDecodePath"]
 ....
                 +---------------------------------+
   created ----> |{io}                             |
@@ -1373,16 +1571,6 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexStr
                 +---------------------------------+
 ....
 
-===== algorithms()
-
-파일을 비교할 때 사용할 알고리즘을 제공하는 메서드이다.
-
-[source,java]
-.HexChannelTest.java#algorithms()
-----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=39..42]
-----
-
 ===== encodeDecodePath(String)
 
 [source,java]
@@ -1391,7 +1579,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexCha
     @Test(dataProvider = "algorithms")
     public void encodeDecodePath(final String algorithm)
             throws IOException, NoSuchAlgorithmException {
-        // @implement
+        // @todo: implement.
     }
 ----
 
@@ -1400,7 +1588,7 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexCha
 [source,java]
 .HexChannelTest.java#encodeDecodePath(String)
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=55..61]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=103..114]
 ----
 <1> {apidocs-javase}/java/nio/file/StandardOpenOption.html#DSYNC[`StandardOpenOption#DSYNC`] 옵션을 명시해서 갱신되는 내용이 저장소에 동시에(synchronously) 기록되도록 한다.
 
@@ -1409,16 +1597,15 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexCha
 [source,java]
 .HexChannelTest.java#encodeDecodePath(String)
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=62..71]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=115..129]
 ----
-<1> {apidocs-javase}/java/nio/file/StandardOpenOption.html#DELETE_ON_CLOSE[`StandardOpenOption#DELETE_ON_CLOSE`] 옵션을 명시해서 `close()` 될 때 파일이 삭제도록 한다.
 
 또 다른 파일(`decoded`)에 `ReadableHexChannel` 클래스를 이용해서 복사한 후 (디코드한 후) 메시지 다이제스트 값을 구한다.
 
 [source,java]
 .HexChannelTest.java#encodeDecodePath(String)
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=72..82]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=130..144]
 ----
 
 두 메시지 다이제스트 값을 비교한다.
@@ -1426,16 +1613,17 @@ include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexCha
 [source,java]
 .HexChannelTest.java#encodeDecodePath(String)
 ----
-include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=83..83]
+include::codes/hex-codec-lib/src/test/java/com/github/jinahya/verbose/hex/HexChannelTest.java[lines=145..145]
 ----
 
 === Exercises
+
 . `HexEncoderImpl#encodeNible(int)` 과 `HexDecoderImpl#decodeNibble(int)` 의 `switch` 구문을 `if/else` 구문으로 바꿔보자.
-+
+
 . 시험 클래스를 하나 추가하고 클래스 파일의 처음 4 개의 바이트들을 `base16` 으로 출력해 보자.
 +
 [source,java]
-.ClassFileTest.java#magic()
+.ClassFileTest.java
 ----
 public class ClassFileTest {
 
@@ -1501,72 +1689,6 @@ public class CharsetTest {
     }
 }
 ----
-. 다음 조건을 만족하는 메서드를 구현해 보자.
-+
-[source, java]
-----
-// input 에서 output 으로 데이터를 복사한다.
-// length 만큼의 길이를 가지는 버퍼를 사용한다.
-// 최대 count 만큼만 복사한다. (count 가 -1L 이면 스트림(input)의 끝까지 복사한다.)
-// 실제로 복사된 바이트 개수를 반환한다.
-// (count 가 -1L 이 아닐 경우 count 보다 같거나 작아야 한다.)
-long copy(InputStream input, OutputStream output, int length, long count)
-    throws IOException {
-    // @todo: implement
-    // 인자들의 유효성을 확인하자.
-    return 0L;
-}
-----
-. 다음 조건을 만족하는 메서드를 구현해 보자.
-+
-[source, java]
-----
-// input 에서 output 으로 데이터를 복사한다.
-// 주어진 버퍼(buffer)를 사용한다.
-// 최대 count 만큼만 복사한다. (count 가 -1L 이면 스트림(input)의 끝까지 복사한다.)
-// 실제로 복사된 바이트 개수를 반환한다.
-// (count 가 -1L 이 아닐 경우 count 보다 같거나 작아야 한다.)
-long copy(InputStream input, OutputStream output, byte[] buffer, long count)
-    throws IOException {
-    // @todo: implement
-    // 인자들의 유효성을 확인하자.
-    return 0L;
-}
-----
-. 다음 조건을 만족하는 메서드를 구현해 보자.
-+
-[source,java]
-----
-// readable 에서 writable 로 데이터를 복사한다.
-// capacity 만큼의 용량을 가지는 버퍼를 사용한다.
-// 최대 count 만큼만 복사한다. (count 가 -1L 이면 채널(readable)의 끝까지 복사한다.)
-// 실제로 복사된 바이트 개수를 반환한다.
-// (count 가 -1L 이 아닐 경우 count 보다 같거나 작아야 한다.)
-long copy(ReadableByteChannel readable, WritableByteChannel writable,
-          int capacity, long count)
-    throws IOException {
-    // @todo: implement
-    // 인자들의 유효성을 확인하자.
-    return 0L;
-}
-----
-. 다음 조건을 만족하는 메서드를 구현해 보자.
-+
-[source,java]
-----
-// readable 에서 writable 로 데이터를 복사한다.
-// 주어진 버퍼(buffer)를 사용한다.
-// 최대 count 만큼만 복사한다. (count 가 -1L 이면 채널(readable)의 끝까지 복사한다.)
-// 실제로 복사된 바이트 개수를 반환한다.
-// (count 가 -1L 이 아닐 경우 count 보다 같거나 작아야 한다.)
-long copy(ReadableByteChannel readable, WritableByteChannel writable,
-          ByteBuffer buffer, long count)
-    throws IOException {
-    // @todo: implement
-    // 인자들의 유효성을 확인하자.
-    return 0L;
-}
-----
 
 === percent-codec-api
 
@@ -1590,11 +1712,29 @@ http://.../files/a%2Fb%3Fc?descriptor=e%26f%3Dg%2Fh
 
 https://tools.ietf.org/html/rfc3986[RFC 3986]의 https://tools.ietf.org/html/rfc3986#section-2.1https://tools.ietf.org/html/rfc3986#section-2.1[Percent-Encoding] 항목에 위 예시에서 사용된 방법이 정의되어 있다. 주어진 문자가 https://tools.ietf.org/html/rfc3986#section-2.3[Unreserved Characters] 항목에 정의된 범위(`알파벳`, `숫자`, `'-'`, `'.'`, `'_'`, `'~'`) 밖이면 `'%'` 하나와 두개의 `hex` 문자로 표현한다.
 
+아래는 `hello, world` 문자열이 percent encoding 된 모양을 나타낸다.
+
+[source,text]
+----
+    0                    7          11          15                      23
+    h  e  l  l  o  , SP  w  o  r  l  d
+   -- -- -- -- -- -- -- -- -- -- -- --
+0x 68 65 6C 6C 6F 2C 20 77 6F 72 6C 64
+   --             -- --
+    |             -- -- --
+   --                      -- -- --
+    h  e  l  l  o  %  2  C  %  2  0  w  o  r  l  d
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+0x 68 65 6C 6C 6F 25 32 63 25 32 30 77 6F 72 6C 64
+----
+
+보는 봐와 같이 `,` 와 `'{nbsp}'` 가 각각 `%2C` 와 `%20` 으로 변환되었다.
+
 [NOTE]
 ====
 http://docs.oracle.com/javase/8/docs/api/java/net/URLEncoder.html[`java.net.URLEncoder`] 와 http://docs.oracle.com/javase/8/docs/api/java/net/URLDecoder.html[`java.net.URLDecoder`] 는 해당 문서에 기술되어 있듯이 http://www.w3.org/TR/html5/forms.html#url-encoded-form-data[HTML]에 정의된 `application/x-www-form-urlencoded` 형식을 위한 코덱이다. `'~'` 대신 `'*'` 를 그대로 표기하며 공백 문자(`'{nbsp}'`)를 `"%20"` 이 아닌 `'+'` 로 인코딩한다. 아래 코드는 `"value"` 라는 필드 이름과 `"홍 길동"` 이라는 필드 값을 서버에 전달하는 예시 문서이다. (공백 문자(`'{nbsp}'`)가 `'+'` 로 인코딩되어 있다.)
 ----
-POST /names HTTP/1.1
+POST /names/add HTTP/1.1
 Host: www.example.com:80
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 34
@@ -1623,7 +1763,7 @@ public interface PercentEncoder {
 
 ===== encode(ByteBuffer, ByteBuffer)
 
-두 개의 버퍼를 전달받아 첫 번째 버퍼의 바이트들(숫자들)을 변환한 후 (변환된 문자들을) 두 번째 버퍼에 담는다. `HexEncoder` 인터페이스와는 다르게 변환할 바이트가 몇 개의 문자로 변환될 지 알 수 없다. (알 수는 있지만 미리 알 필요가 없다고 상정한다.) 때문에 `encodeOcetet(int, ByteBuffer)` 메서드가 `BufferOverflowException` 을 던지는지 확인한다.
+두 개의 버퍼를 전달받아 첫 번째 버퍼의 바이트들(숫자들)을 (문자들로) 변환한 후 두 번째 버퍼에 담는다. `HexEncoder` 인터페이스와는 다르게 변환할 바이트가 몇 개의 문자로 변환될 지 알 수 없다. (알 수는 있지만 미리 알 필요가 없다고 상정한다.) 때문에 `encodeOcetet(int, ByteBuffer)` 메서드가 `BufferOverflowException` 을 던지는지 확인한다.
 [source,java]
 .PercentEncoder.java#encode(ByteBuffer, ByteBuffer)
 ----
@@ -1651,6 +1791,8 @@ include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percen
 <3> `encoded` 버퍼를 뒤집어(flip) 읽을 수 있는 상태로 만든 후 반환한다.
 
 ===== encode(String, Charset)
+
+주어진 문자열을 인코드한 후 반환한다.
 
 [source,java]
 .PercentEncoder.java#encode(String,Charset)
@@ -1685,7 +1827,7 @@ public interface PercentDecoder {
 [source,java]
 .PercentDecoder.java#decode(ByteBuffer, ByteBuffer)
 ----
-    // encoded 버퍼의 문자들을 디코드한 숫자들을 decoded 버프에 담는다.
+    // encoded 버퍼의 문자들을 디코드한 숫자들을 decoded 버퍼에 담는다.
     // decoded 버퍼에 추가된 숫자들의 개수를 반환한다.
 include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percent/PercentDecoder.java[lines=37..50]
 ----
@@ -1704,7 +1846,7 @@ include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percen
     // 주어진 버퍼(encoded)의 문자들을 디코드한 후 인코드된 숫자들을 새 버퍼에 담아 반환한다.
 include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percent/PercentDecoder.java[lines=59..63]
 ----
-<1> `encoded` 버퍼와 같은 용량의 버퍼를 생성한다. (모든 바이트들이 `%XX` 형태로 변환되었다고 가정한다.)
+<1> `encoded` 버퍼와 같은 용량의 버퍼를 생성한다. (모든 바이트들이 `%XX` 형태가 아닌 그대로 변환되었다고 가정한다.)
 <2> `decode(ByteBuffer, ByteBuffer)` 메서드를 이용해 디코드한다.
 <3> 반환할 버퍼(`decoded`)를 뒤집어(`flip()`) 읽을 수 있는 상태로 만든다.
 
@@ -1716,80 +1858,26 @@ include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percen
 include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percent/PercentDecoder.java[lines=75..82]
 ----
 <1> 문자열로부터 입력 배열을 생성한다.
-<2> 입력 배열과 같은 크기를 가지는 출력 배열을 생성한다. (모든 숫자들이 `%XX` 형태로 변환되었다고 가정한다.)
+<2> 입력 배열과 같은 크기를 가지는 출력 배열을 생성한다. (모든 숫자들이 `%XX` 형태가 아닌 그대로 변환되었다고 가정한다.)
 <3> 두 배열을 감싸는(wrap) 버퍼들을 생성한 후 `decode(ByteBuffer, ByteBuffer)` 메서드을 이용해 변환한다.
 <4> 변환된 출력 배열로부터 `charset` 을 이용해 출력 문자열을 생성한다.
 
 ==== Exercises
-. `WritableHexChannel` 을 참고하여 `WritablePercentChannel` 클래스를 작성하라.
+
+. `WritablePercentChannel` 클래스를 완성하라.
 +
 [source,java]
+.ReadablePercentChannel.java#write(ByteBuffer)
 ----
-public class WritablePercentChannel implements WritableByteChannel {
-
-    public WritablePercentChannel(final WritableByteChannel channel,
-                                  final PercentEncoder encoder) {
-        super();
-        this.channel = channel;
-        this.encoder = encoder;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return channel.isOpen();
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (channel != null) {
-            channel.close();
-        }
-    }
-
-    @Override
-    public int write(final ByteBuffer src) throws IOException {
-        // @todo: implement
-        throw new UnsupportedOperationException("not implemented yet!");
-    }
-
-    protected WritableByteChannel channel;
-    protected PercentEncoder encoder;
-}
+include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percent/WritablePercentChannel.java[lines=70..80]
 ----
-. `ReadableHexChannel` 클래스를 참고하여 `ReadablePercentChannel` 클래스를 작성하라.
+
+. `ReadablePercentChannel` 클래스를 완성하라.
 +
 [source,java]
+.ReadablePercentChannel.java#read(ByteBuffer)
 ----
-public class ReadablePercentChannel implements ReadableByteChannel {
-
-    public ReadablePercentChannel(final ReadableByteChannel channel,
-                                  final PercentDecoder decoder) {
-        super();
-        this.channel = channel;
-        this.decoder = decoder;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return channel.isOpen();
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (channel != null) {
-            channel.close();
-        }
-    }
-
-    @Override
-    public int read(final ByteBuffer dst) throws IOException {
-        // @todo: implement
-        throw new UnsupportedOperationException("not implemented yet!");
-    }
-
-    protected ReadableByteChannel channel;
-    protected PercentDecoder decoder;
-}
+include::codes/percent-codec-api/src/main/java/com/github/jinahya/verbose/percent/ReadablePercentChannel.java[lines=70..80]
 ----
 
 === percent-codec-lib
@@ -1801,6 +1889,7 @@ pecent-codec-api 에 정의된 인터페이스들을 구현한 모듈이다. hex
 ----
 $ pwd
 /.../path/to/.../verbose-java/percent-codec-lib
+
 $ mvn dependency:tree -Dscope=runtime
 ...
 [INFO] com.github.jinahya:percent-codec-lib:jar:<version>
@@ -1808,31 +1897,49 @@ $ mvn dependency:tree -Dscope=runtime
 [INFO] +- com.github.jinahya:hex-codec-lib:jar:<version>:runtime
 [INFO] \- com.github.jinahya:percent-codec-api:jar:<version>:compile
 ...
+
 $
 ----
+
 hex-codec-api 를 compile scope 로 정의하여 구현작업에 사용되었고 hex-codec-lib 을 runtime scope 로 정의하여 실제로 동작할 때만 사용되도록 설정하였다.
 
 ==== PercentEncoderImpl.java
 
+`PercentEncoder` 인터페이스를 구현한 클래스이다.
+
 [source,java]
-.HexEncoderImpl.java
+.PercentEncoderImpl.java
 ----
 public class HexEncoderImpl implements HexEncoder {
-
-include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentEncoderImpl.java[lines=39..42]
-
-include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentEncoderImpl.java[lines=71..73]
+    // @todo: implement.
 }
+----
+
+===== PercentEncoder(Supplier<HexEncoder>)
+
+`HexEncoder` 개체를 제공하는 `Supplier` 를 받는 생성자이다.
+
+[source,java]
+.PercentEncoderImpl.java#PerentEncoder(Supplier<HexEncoder>)
+----
+
+include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentEncoderImpl.java[lines=38..42]
+
+include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentEncoderImpl.java[lines=74..83]
 ----
 <1> `HexEncoder` 객체를 제공한다.
 <2> `hexEncoderSupplier` 로부터 게으르게(lazily) 제공될 객체이다.
+
+===== PercentEncoder()
+
+`HexEncoder` 개체를 `ServiceLoader` 를 이용해서 적재하는 생성자이다.
 
 [source,java]
 .HexEncoderImpl.java#PercentEncoderImpl()
 ----
 include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentEncoderImpl.java[lines=49..51]
 ----
-<1> SPI(Service Provider Interface) 를 통해 객체를 적재하고 제공하는 `Supplier` 이다.
+<1> `ServiceLoader#load(Class)` 메서드를 통해 객체를 적재하고 제공하는 `Supplier` 이다.
 
 ===== encodeOctet(int, ByteBuffer)
 
@@ -1841,30 +1948,49 @@ include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percen
 [source,java]
 .PercentEncoderImpl.java#encodeOctet(int, ByteBuffer)
 ----
-include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentEncoderImpl.java[lines=53..69]
+include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentEncoderImpl.java[lines=53..67]
 ----
-<1> 인코딩할 필요가 없는 숫자는 그대로 버퍼에 담는다.
-<2> 인코딩이 필요한 문자는 한 개의 `"%"` 를 버퍼에 담고
-<3> 게으르게(lazily) 적재된 `HexEncoder` 객체의 `encodeOctet(int, ByteBuffer)` 메서드를 이용해 두개의 hex 문자를 버퍼이 담는다.
+<1> 변환할 필요가 없는 숫자는 그대로 버퍼에 담는다.
+<2> 변환이 필요한 문자는 한 개의 `"%"` 를 버퍼에 담고
+<3> `HexEncoder` 인터페이스의 `encodeOctet(int, ByteBuffer)` 메서드를 이용해 두개의 hex 문자로 변환하여 버퍼에 담는다.
 
 ==== PercentDecoderImpl.java
+
+`PercentDecoder` 인터페이스를 구현한 클래스이다.
 
 [source,java]
 .PercentEncoderImpl.java
 ----
 public class PercentDecoderImpl implements PercentEncoder {
-
-include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentDecoderImpl.java[lines=37..40]
-
-include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentDecoderImpl.java[lines=63..65]
+    // @todo: implement.
 }
 ----
+
+===== PercentDecoderImpl(Supplier<HexDecoder>)
+
+`HexDecoder` 개체를 제공하는 `Supplier` 개체를 받는 생성자이다.
+
+[source,java]
+.PercentEncoderImpl.java
+----
+include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentDecoderImpl.java[lines=37..41]
+
+include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentDecoderImpl.java[lines=62..71]
+----
+<1> `HexDecoder` 개체를 제공하는 `Supplier` 개체이다.
+<2> `decoderSupplier` 를 통해 게으르게 얻을 `HexDecoder` 이다.
+
+===== PercentDecoderImpl()
+
+`ServiceLoader` 클래스를 이용하는 `Supplier` 를 사용하는 생성자이다.
 
 [source,java]
 .PercentEncoderImpl.java#PercentEncoderImpl()
 ----
-include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentDecoderImpl.java[lines=48..50]
+include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentDecoderImpl.java[lines=49..51]
 ----
+
+===== decodeOctet(int, ByteBuffer)
 
 다음과 같이 `decodeOctet(int, ByteBuffer)` 를 구현했다.
 
@@ -1873,8 +1999,12 @@ include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percen
 ----
 include::codes/percent-codec-lib/src/main/java/com/github/jinahya/verbose/percent/PercentDecoderImpl.java[lines=52..61]
 ----
-<1> 첫 문자를 읽는다.
-<2> 첫 문자가 `%` 이면 게으르게(lazily) 초기회된 `hexDecoder` 객체의 `decodeOctet(ByteBuffer)` 메서드를 이용하여 디코드한 값을 반환한다.
+<1> 문자를 하나 읽는다.
+<2> 첫 문자가 `%` 이면 `HexDecoder` 인터페이스의 `decodeOctet(ByteBuffer)` 메서드를 이용하여 디코드한 값을 반환한다.
 <3> 디코딩이 필요치 않은 문자는 그대로 반환한다.
 
 ==== Unit Testing Strategy
+
+==== Exercises
+
+.

@@ -38,7 +38,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
-public class PercentChannelTest {
+public class PercentChannel1Test {
 
     private static final Logger logger = getLogger(lookup().lookupClass());
 
@@ -58,7 +58,7 @@ public class PercentChannelTest {
         try (ReadableByteChannel readable = open(created, READ);
              WritableByteChannel channel = open(encoded, WRITE, DSYNC);
              WritableByteChannel writable = nonBlocking(
-                     WritableByteChannel.class, new WritablePercentChannel(
+                     WritableByteChannel.class, new WritablePercentChannel1(
                              () -> channel,
                              () -> load(PercentEncoder.class).iterator()
                                      .next()))) {
@@ -71,7 +71,7 @@ public class PercentChannelTest {
         try (WritableByteChannel writable = open(decoded, WRITE, DSYNC)) {
             final ReadableByteChannel channel = open(encoded, READ);
             ReadableByteChannel readable = nonBlocking(
-                    ReadableByteChannel.class, new ReadablePercentChannel(
+                    ReadableByteChannel.class, new ReadablePercentChannel1(
                             () -> channel,
                             () -> load(PercentDecoder.class).iterator()
                                     .next()));

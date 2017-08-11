@@ -15,52 +15,23 @@
  */
 package com.github.jinahya.verbose.percent;
 
+import com.github.jinahya.verbose.hex.ReadableFilterChannel;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import static java.nio.ByteBuffer.allocate;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
 import static java.util.Objects.requireNonNull;
 import java.util.function.Supplier;
 
-public class ReadablePercentChannel<T extends ReadableByteChannel, U extends PercentDecoder>
-        implements ReadableByteChannel {
+public class ReadablePercentChannel1<T extends ReadableByteChannel, U extends PercentDecoder>
+        extends ReadableFilterChannel<T> {
 
-    public ReadablePercentChannel(final Supplier<T> channelSupplier,
+    public ReadablePercentChannel1(final Supplier<T> channelSupplier,
                                   final Supplier<U> decoderSupplier) {
-        super();
-        this.channelSupplier = requireNonNull(
-                channelSupplier, "channelSupplier is null");
+        super(channelSupplier);
         this.decoderSupplier = requireNonNull(
                 decoderSupplier, "decoderSupplier is null");
-    }
-
-    @Override
-    public boolean isOpen() {
-        return !closed;
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (closed) {
-            return;
-        }
-        if (channel != null) {
-            channel.close();
-            channel = null;
-        }
-        closed = true;
-    }
-
-    protected T channel() throws ClosedChannelException {
-        if (closed) {
-            throw new ClosedChannelException();
-        }
-        if (channel == null && (channel = channelSupplier.get()) == null) {
-            throw new RuntimeException("null channel supplied");
-        }
-        return channel;
     }
 
     protected U decoder() {
@@ -95,7 +66,7 @@ public class ReadablePercentChannel<T extends ReadableByteChannel, U extends Per
             aux.compact();
             aux.limit(3);
             while (aux.hasRemaining()) {
-                if (channel().read(aux) == -1) {
+                if (super.read(aux) == -1) {
                     throw new EOFException("unexpected eof");
                 }
             }
@@ -107,13 +78,7 @@ public class ReadablePercentChannel<T extends ReadableByteChannel, U extends Per
         return decoded;
     }
 
-    private final Supplier<T> channelSupplier;
-
     private final Supplier<U> decoderSupplier;
-
-    private boolean closed;
-
-    private T channel;
 
     private U decoder;
 

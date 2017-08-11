@@ -17,13 +17,24 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 <1> `input` 객체의 {apidocs-javase}/java/io/InputStream.html#read-byte:A-[`InputStream#read(byte[\])`] 메서드에 `buffer` 를 전달해서 `-1`(`end-of-stream`) 이 반환되기 전까지
 <2> `output` 에 {apidocs-javase}/java/io/OutputStream.html#write-byte:A-int-int-[`OutputStream#write(byte[\], int, int)`] 메서드를 이용해서 기록한다.
 
-****
-{apidocs-javase}/java/io/InputStream.html#read-byte:A-[`InputStream#read(byte[\])`] 메서드의 설명을 잘 읽어 본 후 아래 코드에 대해 생각해 보자.
+[TIP]
+====
+{project-commons-io}[Commons IO] 의 link:++https://static.javadoc.io/commons-io/commons-io/2.5/org/apache/commons/io/IOUtils.html#copyLarge(java.io.InputStream,%20java.io.OutputStream,%20byte[])++[`copyLarge(Ljava.io.InputStream;Ljava.io.OutputStream;[B)J`] 를 이용하여 동일한 기능을 수행할 수 있다.
+====
+
+[TIP]
+====
+{project-guava}[Guava] 의 https://google.github.io/guava/releases/23.0/api/docs/com/google/common/io/ByteStreams.html#copy-java.io.InputStream-java.io.OutputStream-[`copy(Ljava.io.InputStream;Ljava.io.OutputStream;)J`] 를 이용하여 동일한 기능을 수행할 수 있다. (내부적으로 `8192` 만큼의 크기를 가지는 버버를 사용한다.)
+====
+
+[WARNING]
+====
+{apidocs-javase}/java/io/InputStream.html#read-byte:A-[`InputStream#read([B)I`] 메서드의 설명을 잘 읽어 본 후 아래 코드에 대해 생각해 보자.
 [source,java]
 ----
-        for (int length; (length = input.read(buffer)) > 0;)
+for (int length; (length = input.read(buffer)) > 0;)
 ----
-****
+====
 
 두개의 파일을 전달받아 복사하는 메서드를 다음과 같이 구현할 수 있다.
 
@@ -33,11 +44,11 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
     // source 에서 target 으로 데이터를 복사한다.
 include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils1.java[lines=60..69]
 ----
-<1> `flush()` 메서드를 명시적으로 호출하여 모든 데이터가 해당 파일에 기록되는 것을 보장한다.
+<1> `flush()` 메서드를 명시적으로 호출하여 쌓여있는(buffered) 데이터를 밀어낸다.
 
 [TIP]
 ====
-`OutputStream` 객체 혹은 `Writer` 객체에 값을 기록한 후 `close()` 메스드를 호출하기 전에 (혹은 필요한 때마다) `flush()` 메서드를 꼭 호출해서 (아직 파일에 기록도지 않은 채) 쌓여있는 데이터를 밀어내야 한다.
+`OutputStream` 객체 혹은 `Writer` 객체에 값을 기록한 후 `close()` 메스드를 호출하기 전에 (혹은 필요한 때마다) `flush()` 메서드를 꼭 호출해서 (아직 OS 수준으로 전달되지 않은 채) 쌓여있는 데이터를 밀어내야 한다.
 ====
 
 [CAUTION]
@@ -61,7 +72,8 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 <5> 버퍼에 쌓여 있는 내용을 모두 기록한다.
 
 ****
-`copy1(ReadableByteChannel, WritableByteChannel, ByteBuffer)` 메서드는 `write(ByteBuffer)` 메서드를 한 번만 호출하는 대신 `compact()` 메서드를 사용해서 데이터를 계속 버퍼의 앞쪽으로 모으는 작업을 한다. [참조: http://shop.oreilly.com/product/9780596002886.do[Java NIO, O'Reilly Media]]
+`copy1(ReadableByteChannel, WritableByteChannel, ByteBuffer)` 메서드는 `write(ByteBuffer)` 메서드를 한 번만 호출하는 대신 `compact()` 메서드를 사용해서 (아직 기록되지 않은) 데이터를 계속 버퍼의 앞쪽으로 모으는 작업을 한다. +
+[참조: http://shop.oreilly.com/product/9780596002886.do[Java NIO, O'Reilly Media]]
 ****
 
 [source,java]
@@ -72,7 +84,8 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 <1> 버퍼에 읽혀진 모든 데이터를 기록한다.
 
 ****
-`copy2(ReadableByteChannel, WritableByteChannel, ByteBuffer)` 메서드는 데이터를 앞쪽으로 모으는 작업(`compact()`)을 하지 않는 대신 버퍼에 데이터가 남아 있을 동안 `write(ByteBuffer)` 메서드를 계속 호출한다. [참조: http://shop.oreilly.com/product/9780596002886.do[Java NIO, O'Reilly Media]]
+`copy2(ReadableByteChannel, WritableByteChannel, ByteBuffer)` 메서드는 데이터를 앞쪽으로 모으는 작업(`compact()`)을 하지 않는 대신 버퍼에 데이터가 남아 있을 동안 `write(ByteBuffer)` 메서드를 계속 호출한다. +
+[참조: http://shop.oreilly.com/product/9780596002886.do[Java NIO, O'Reilly Media]]
 ****
 
 아래는 `java.nio.file.Path` 형의 객체 두개를 전달받아 복사하는 메서드이다.
@@ -80,11 +93,11 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 [source,java]
 .IoUtils2.java#copy1(Path, Path, ByteBuffer)
 ----
-include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=98..108]
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=91..101]
 ----
 <1> 갱신된 내용이 저장소에 기록되는 것을 보장한다. ('true` 값을 전달하여 데이터뿐만 아니라 변경된 https://docs.oracle.com/javase/tutorial/essential/io/fileAttr.html[메타정보]도 같이 저장되도록 할 수 있다.)
 
-[NOTE]
+[TIP]
 ====
 `FileChannel#force(boolean)` 메서드를 사용하는 대신 `FileChannel#open` 메서드에 {apidocs-javase}/java/nio/file/StandardOpenOption.html#DSYNC[`StandardOpenOption#DSYNC`] 혹은 {apidocs-javase}/java/nio/file/StandardOpenOption.html#DSYNC[`StandardOpenOption#SYNC`] 를 전달하여 자동으로 처리되게끔 할 수도 있다.
 ====
@@ -94,17 +107,17 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 다음은 `trasferTo` 메서드를 사용해서 파일을 복사하는 메서드이다.
 
 [source,java]
-.IoUtils2.java#copy2(Path, Path)
+.IoUtils2.java#copy3(Path, Path)
 ----
-include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=110..124]
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=114..124]
 ----
 
 다음은 `trasferFrom` 메서드를 사용해서 파일을 복사하는 메서드이다.
 
 [source,java]
-.IoUtils2.java#copy2(Path, Path);
+.IoUtils2.java#copy4(Path, Path);
 ----
-include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=126..140]
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=126..136]
 ----
 
 [CAUTION]
@@ -112,7 +125,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 {apidocs-javase}/java/nio/channels/FileChannel.html#transferTo-long-long-java.nio.channels.WritableByteChannel-[`FileChannel#transferTo`] 메서드와 {apidocs-javase}/java/nio/channels/FileChannel.html#transferFrom-java.nio.channels.ReadableByteChannel-long-long-[`FileChannel#transferFrom`] 메서드는 `-1` 을 반환하지 않는다.
 ====
 
-=== Using Message Digests
+=== Using java.security.MessageDigest
 
 두 개의 파일이 주어졌을 때 두 파일의 내용이 같은지 어떻게 확인할 수 있을까? 두 파일을 처음부터 끝까지 각 바이트별로 비교하는 것도 가능한 방법중에 하나일 수 있다. 또 다른 방법은 {apidocs-javase}/java/security/MessageDigest.html[`java.security.MessageDigest`] 클래스를 이용하여 각 파일의 메시지 다이제스트 값을 구한 후 두 값을 비교하는 것이다.
 
@@ -159,7 +172,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 아래는 `Path` 객체를 전달 받아 메시지 다이제스트를 반환하는 메서드이다.
 
 [source,java]
-.MdUtils2.java#digest(Path, String)
+.MdUtils2.java#digest(String, Path, ByteBuffer)
 ----
 include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/MdUtils2.java[lines=69..76]
 ----
@@ -167,7 +180,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 
 === Implementing an interface without implementing the interface
 
-`HelloWorld` 인터페이스를 구현한 어떤 클래스가 주어졌을 때 각 메서드에서 로그를 남기려면 어떻게 해야 할까? 다음과 같이 그 클래스를 확장하여 로그를 남기는 코드를 삽입하면 된다.
+`HelloWorld` 인터페이스를 구현한 어떤 클래스가 주어졌을 때 각 메서드에서 로그를 남기려면 어떻게 해야 할까? 물론, 다음과 같이 그 클래스를 확장하여 로그를 남기는 코드를 삽입하면 된다.
 
 [source,java]
 ----
@@ -197,7 +210,7 @@ include::../../../src/main/java/com/github/jinahya/verbose/hello/HelloWorldInvoc
 <1> 호출된 메서드가 `HelloWorld` 인터페이스에 정의된 것이라면 메서드와 인자들에 관한 정보를 로그로 남긴다.
 <2> 해당 메서드와 인자들을 실제 `HelloWorld` 객체에 적용한 후 그 결과를 반환한다.
 
-이제 {apidocs-javase}/java/lang/reflect/Proxy.html#newProxyInstance-java.lang.ClassLoader-java.lang.Class:A-java.lang.reflect.InvocationHandler-[`Proxy#newProxyInstance(ClassLoader, Class<?>[\], InvocationHandler)`] 메서드를 이용하여 프록시 객체를 생성할 수 있다.
+이제 {apidocs-javase}/java/lang/reflect/Proxy.html#newProxyInstance-java.lang.ClassLoader-java.lang.Class:A-java.lang.reflect.InvocationHandler-[`Proxy#newProxyInstance(ClassLoader, Class<?>[], InvocationHandler)`] 메서드를 이용하여 프록시 객체를 생성할 수 있다.
 
 [source,java]
 ----
@@ -210,9 +223,9 @@ include::../../../src/main/java/com/github/jinahya/verbose/hello/HelloWorldProxy
 ----
 include::../../../src/test/java/com/github/jinahya/verbose/hello/HelloWorldProxyTest.java[lines=35..39]
 ----
-<1> 아무런 동작도 하지 않는 `HelloWorld` 객체를 생성한다.
-<2> proxy 객체를 하나 생성한다.
-<3> proxy 객체에 특정 메서드를 호출한다.
+<1> `HelloWorld` 객체가 하나 있다고 가정한다.
+<2> proxy 객체를 생성한다.
+<3> 생성된 proxy 객체에 특정 메서드를 호출한다.
 
 [source,txt]
 ----
@@ -307,7 +320,7 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
         // buffer.length 가 0 일때 아래 코드에서 무슨 일이 일어날까?
         // ...
 include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils1.java[lines=45..45]
-        //
+        // ...
     }
 ----
 
@@ -339,12 +352,12 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
         }
         // buffer.capacity 가 0 일때 아래 코드에서 무슨 일이 일어날까?
         // ...
-include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=52..52]
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/IoUtils2.java[lines=51..51]
         // ...
     }
 ----
 
-. 위 항목과 동인할 문제점이 있는 코드를 모두 수정하라.
+. 위 항목과 동일할 문제점이 있는 코드를 모두 수정하라.
 
 . `BcUtils.java#nonBlocking` 메서드의 `type` 인자가 {apidocs-javase}/java/nio/channels/spi/AbstractSelectableChannel.html[`AbstractSelectableChannel`] 클래스를 확장한 형이고 `channel` 인자의 {apidocs-javase}/java/nio/channels/spi/AbstractSelectableChannel.html#isBlocking--[`isBlocking`] 메서드가 `true` 를 반환한다면 굳이 non-blocking 을 흉내내기 위한 proxy 객체를 만들어서 반환할 필요가 없다.
 +
@@ -356,12 +369,12 @@ include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/
 public static <T extends WritableByteChannel> T nonBlocking(
         final Class<T> type, final T channel) {
     // T 가 AbstractSelectableChannel 의 하위 형이고
-    // channel.isBlocking() 메서드가 true 를 반환하면
+    // isBlocking() 메서드가 true 를 반환한다면
     // 해당 채널을 그대로 반환한다.
     if (AbstractSelectableChannel.class.isAssignableFrom(type)
         && !((AbstractSelectableChannel) channel).isBlocking()) {
         // channel is an instance of AbstractSelectableChannel
-        // and is a non-blocking one
+        // and is aleady a non-blocking one
         return channel;
     }
     // ...
@@ -379,8 +392,36 @@ public static <T extends ReadableByteChannel> T nonBlocking(
             return channel;
         }
     } catch (final ClassCastException cce) {
-        // channel is not an instance of AbstractSelectableChannel
+        // channel is not even an instance of AbstractSelectableChannel
     }
     // ...
 )
 ----
+
+. `BcUtils.java#nonBlocking` 메서드에서는, 해당 메서드가 호출될 때마다, `WritableByteChannel` 클래스의 `write(Ljava.nio.ByteBuffer;)V` 메서드를 찾아서 사용한다.
++
+[source,java]
+.BcUtils.java#nonBlocking(Class<T>, T)
+----
+        // ...
+include::codes/verbose-java-utils/src/main/java/com/github/jinahya/verbose/util/BcUtils.java[lines=53..59]
+        // ...
+----
+해당 메서드 객체를 클래스 변수로 사용하도록 변경하라.
++
+[source,java]
+.BcUtils.java
+----
+    private static final Method WRITABLE_W; // WritableByteChannel#write(ByteBuffer)
+
+    static {
+        try {
+            WRITABLE_W = WritableByteChanel.class.getMethod
+                    ("write", ByteBuffer.class);
+        } catch (final NoSuchMethodException nsme) {
+            throw new InstantiationError(nsme.getMessage());
+        }
+    }
+----
+
+. `BcUtils.java` 에서, 위 항목에서 언급된 것 처럼, `ReadableByteChannel#read(ByteBuffer)` 에 해당하는 메서드 객체를 클래스 변수로 서언한 뒤 사용하도록 변경하라. 

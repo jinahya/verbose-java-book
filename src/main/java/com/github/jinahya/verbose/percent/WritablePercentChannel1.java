@@ -15,57 +15,28 @@
  */
 package com.github.jinahya.verbose.percent;
 
+import com.github.jinahya.verbose.hex.WritableFilterChannel;
 import java.io.IOException;
 import static java.lang.invoke.MethodHandles.lookup;
 import java.nio.ByteBuffer;
 import static java.nio.ByteBuffer.allocate;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.WritableByteChannel;
 import static java.util.Objects.requireNonNull;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
-public class WritablePercentChannel<T extends WritableByteChannel, U extends PercentEncoder>
-        implements WritableByteChannel {
+public class WritablePercentChannel1<T extends WritableByteChannel, U extends PercentEncoder>
+        extends WritableFilterChannel<T> {
 
     private static final Logger logger
             = getLogger(lookup().lookupClass().getName());
 
-    public WritablePercentChannel(final Supplier<T> channelSupplier,
+    public WritablePercentChannel1(final Supplier<T> channelSupplier,
                                   final Supplier<U> encoderSupplier) {
-        super();
-        this.channelSupplier = requireNonNull(
-                channelSupplier, "channelSupplier is null");
+        super(channelSupplier);
         this.encoderSupplier = requireNonNull(
                 encoderSupplier, "encoderSupplier is null");
-    }
-
-    @Override
-    public boolean isOpen() {
-        return !closed;
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (closed) {
-            return;
-        }
-        if (channel != null) {
-            channel.close();
-            channel = null;
-        }
-        closed = true;
-    }
-
-    protected T channel() throws ClosedChannelException {
-        if (closed) {
-            throw new ClosedChannelException();
-        }
-        if (channel == null && (channel = channelSupplier.get()) == null) {
-            throw new RuntimeException("null channel supplied");
-        }
-        return channel;
     }
 
     protected U encoder() {
@@ -88,19 +59,13 @@ public class WritablePercentChannel<T extends WritableByteChannel, U extends Per
         }
         final int encoded = encoder().encode(src, aux);
         for (aux.flip(); aux.hasRemaining();) {
-            channel().write(aux);
+            super.write(aux);
         }
         aux.clear();
         return encoded;
     }
 
-    private final Supplier<T> channelSupplier;
-
     private final Supplier<U> encoderSupplier;
-
-    private boolean closed;
-
-    private T channel;
 
     private U encoder;
 
