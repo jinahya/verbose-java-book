@@ -16,6 +16,7 @@
 package com.github.jinahya.verbose.percent;
 
 import java.io.UnsupportedEncodingException;
+import static java.lang.invoke.MethodHandles.lookup;
 import java.net.URLEncoder;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -27,12 +28,11 @@ import org.testng.annotations.Test;
  */
 public class URLEncoderTest {
 
-    @Test(enabled = false)
+    private static final Logger logger = getLogger(lookup().lookupClass());
+
+    @Test(enabled = true)
     public void encode() throws UnsupportedEncodingException {
         final String encoded = URLEncoder.encode("홍 길동", "UTF-8");
         logger.debug("encoded: {}", encoded);
     }
-
-    private transient final Logger logger = getLogger(getClass());
-
 }

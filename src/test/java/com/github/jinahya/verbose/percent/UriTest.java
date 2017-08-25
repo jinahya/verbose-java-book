@@ -16,6 +16,7 @@
 package com.github.jinahya.verbose.percent;
 
 import com.google.api.client.util.escape.CharEscapers;
+import static java.lang.invoke.MethodHandles.lookup;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.jersey.uri.UriComponent;
@@ -28,6 +29,8 @@ import org.testng.annotations.Test;
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
 public class UriTest {
+
+    private static final Logger logger = getLogger(lookup().lookupClass());
 
     @Test(enabled = true)
     public void testUriComponent() {
@@ -55,6 +58,4 @@ public class UriTest {
             logger.debug("google: {}", uri);
         }
     }
-
-    private transient final Logger logger = getLogger(getClass());
 }
