@@ -66,7 +66,7 @@ MIN  -4  100  ⤦
              +1
 ----
 
-보는 바와 같이 `011 (+3)` 에서 `1` 을 더했을때 `100 (+4)` 이 되지만 첫번째 비트가 `1` 이므로 음수(`-4`)로 처리된다.
+보는 바와 같이 `0b011 (+3)` 에서 `1` 을 더했을때 `0b100 (+4)` 이 되지만 첫번째 비트가 `1` 이므로 음수(`-4`)로 처리된다.
 
 최대값은 첫번째 비트가 `0` 이고 나머지 모든 비트가 `1` 인 값이고 최소값은 첫번째 비트가 `1` 이고 나머지 비트가 모두 `0` 인 값이다. 이를 수식으로 표현하면 최대값은 `+2^n-1^ - 1` 이고 최소값은 `-2^n-1^` 이다.
 
@@ -166,7 +166,7 @@ s = ?     fraction = 0...0
 
 ===== NaN
 
-exponent 부분을 구성하는 비트들이 모두 `1` 이고 fraction 부분의 비트들중 하나라도 `1` 이면 표현할 수 없는 수(Not a Number)를 나타낸다. (fraction 비트들이 모두 `0` 이면 Infinity이다.)
+Exponent 부분을 구성하는 비트들이 모두 `1` 이고 fraction 부분의 비트들중 하나라도 `1` 이면 표현할 수 없는 수(Not a Number)를 나타낸다. (fraction 비트들이 모두 `0` 이면 Infinity이다.)
 
 .NaN
 ----
@@ -231,7 +231,7 @@ s = ?     fraction = 1...
 
 ==== java.lang.Float
 
-다음은 `&#177;.0f` 과 {apidocs-javase}/java/lang/Float.html[`java.lang.Float`] 클래스에 정의된 상수들을 2진법으로 출력한 내용이다. (보는 바와 같이 `java.lang.Float.NaN` 은 quiet NaN 이다.)
+다음은 `&#177;.0f` 와 {apidocs-javase}/java/lang/Float.html[`java.lang.Float`] 클래스에 정의된 상수들을 2진법으로 출력한 내용이다. (보는 바와 같이 `java.lang.Float.NaN` 은 quiet NaN 이다.)
 
 .Zeros and Constants defined in java.lang.Float
 ----
@@ -395,7 +395,7 @@ public interface HexEncoder {
     // decoded 버퍼에 남아있는(remaining) 각각의 바이트들을 변환하고
     // 그 결과를 encoded 버퍼에 담는다.
     // decoded 버퍼에서 소비된(변환된) 바이트의 개수를 반환한다.
-include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexEncoder.java[lines=42..49]
+include::codes/hex-codec-api/src/main/java/com/github/jinahya/verbose/hex/HexEncoder.java[lines=40..47]
 ----
 <1> `decoded` 버퍼의 현재 위치(`position`) 값을 기록해 둔다.
 <2> `decoded` 버퍼에 읽을 바이트들이 (하나 이상) 남아 있고 `encoded` 버퍼에 최소한 두 개의 바이트를 기록할 수 있는 동안 `encode(int, ByteBuffer)` 를 호출한다.
